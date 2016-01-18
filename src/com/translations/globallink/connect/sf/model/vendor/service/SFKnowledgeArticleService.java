@@ -2,6 +2,7 @@ package com.translations.globallink.connect.sf.model.vendor.service;
 
 import java.io.InputStream;
 import java.util.List;
+
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticle;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleField;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleType;
