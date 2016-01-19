@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="content" type="content" nillable="false" />
+	<xsd:complexType name="content">
+		<xsd:sequence>
+			<xsd:element type="field" name="field" maxOccurs="unbounded"
+				minOccurs="1" />
+		</xsd:sequence>
+		<xsd:attribute name="connectType" type="xsd:string" use="required" />
+		<xsd:attribute name="sourceType" type="xsd:string" use="required" />
+		<xsd:attribute name="sourceName" type="xsd:string" use="required" />
+		<xsd:attribute name="sourceId" type="xsd:string" use="required" />
+	</xsd:complexType>
+	<xsd:complexType name="field">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute type="xsd:string" name="id" use="required" />
+				<xsd:attribute type="xsd:string" name="name" use="required" />
+				<xsd:attribute type="xsd:boolean" name="translate"
+					use="required" />
+				<xsd:attribute type="xsd:int" name="maxLength" use="optional"
+					default="0" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+</xsd:schema>
