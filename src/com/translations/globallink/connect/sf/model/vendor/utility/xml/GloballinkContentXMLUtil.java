@@ -45,8 +45,8 @@ public class GloballinkContentXMLUtil {
 		return content;
 	}
 
-	private byte[] getContentBytesForStream(Content content) throws Exception {
-
+	public byte[] getContentBytesForStream(Content content) throws Exception {
+		
 		JAXBContext context = JAXBContext.newInstance(Content.class);
 
 		Marshaller m = context.createMarshaller();
@@ -55,7 +55,7 @@ public class GloballinkContentXMLUtil {
 		m.setProperty(CharacterEscapeHandler.class.getName(), new CharacterEscapeHandler() {
 			@Override
 			public void escape(char[] ac, int i, int j, boolean flag, Writer writer) throws IOException {
-				writer.write(ac, i, j);
+				writer.write(ac, i, j); 
 			}
 		});
 
@@ -68,6 +68,7 @@ public class GloballinkContentXMLUtil {
 	}
 	
 	public static void main(String[] args) {
+		
 		Content content = new Content("SF", "offer", "Test1", "123QWE");
 		Field cField = new Field("Test title", "123QWE", "title", true, 256, "text", false);
 		content.getFields().add(cField);
@@ -75,8 +76,12 @@ public class GloballinkContentXMLUtil {
 		content.getFields().add(cField);
 		cField = new Field("vaibhav", "123QWE", "submitter", false, 0, "text", true);
 		content.getFields().add(cField);
+		cField = new Field("pankaj", "123QWE", "submitter", false, 0, "text", true);
+		content.getFields().add(cField);
 		GloballinkContentXMLUtil util = new GloballinkContentXMLUtil();
+		
 		try {
+			
 			System.out.println(new String(util.getContentBytesForStream(content)));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

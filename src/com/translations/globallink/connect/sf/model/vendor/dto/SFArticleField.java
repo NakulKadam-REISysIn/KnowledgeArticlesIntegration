@@ -5,7 +5,8 @@ public class SFArticleField {
     private String name;
     private String label;
     private String type;
-    private String length;
+    private int length;
+    private boolean transalate;
 
     public String getName() {
 	return name;
@@ -31,11 +32,35 @@ public class SFArticleField {
 	this.type = type;
     }
 
-    public String getLength() {
-	return length;
-    }
+	
 
-    public void setLength(String length) {
-	this.length = length;
-    }
+	/**
+	 * @return the transalate
+	 */
+	public boolean isTransalate() {
+		return transalate;
+	}
+
+	/**
+	 * @param transalate the transalate to set
+	 */
+	public void setTransalate(boolean transalate) {
+		this.transalate = transalate;
+	}
+
+	/**
+	 * @return the length
+	 */
+	public int getLength() {
+		return length;
+	}
+
+	/**
+	 * @param length the length to set
+	 */
+	public void setLength(int length) {
+		this.length = length;
+	}
+
+   
 }

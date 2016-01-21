@@ -2,7 +2,8 @@ package com.translations.globallink.connect.sf.model.vendor.utility.xml;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.apache.commons.lang.StringUtils;
+//import org.apache.commons.lang.StringUtils;   
+import org.apache.commons.lang3.StringUtils;
 
 public class XmlCDATA extends XmlAdapter<String, String> {
 
