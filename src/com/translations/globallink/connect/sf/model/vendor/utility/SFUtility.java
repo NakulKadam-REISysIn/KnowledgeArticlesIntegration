@@ -145,7 +145,7 @@ public class SFUtility {
 	 * @throws CustomException
 	 * 
 	 */
-	public static String getQueueId(String developerQueueName,
+/*	public static String getQueueId(String developerQueueName,
 			String accessToken, String baseURL) throws ClientProtocolException,
 			IOException, JSONException, CustomException {
 		String queueId = "";
@@ -171,7 +171,7 @@ public class SFUtility {
 		}
 		return queueId;
 	}
-
+*/
 	/**
 	 * 
 	 * 
@@ -200,8 +200,10 @@ public class SFUtility {
 			String accessToken, String baseURL) throws ClientProtocolException,
 			IOException, JSONException, CustomException {
 		List<String> processInstanceIdList = new ArrayList<String>();
+		// we are thinking of using XML files to configure all the queries and read it from there - low priority.
 		String queryStr = "query?q=SELECT+ProcessInstanceId+FROM+ProcessInstanceWorkitem+where+ActorId=+'"
 				+ developerQueueId + "'";
+		// remove below duplicate code.
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseURL + Constants.REST_URL + queryStr);
 		httpGet.addHeader(generateAuthHeader(accessToken));
@@ -265,6 +267,7 @@ public class SFUtility {
 		String queryStr = "query?q=SELECT+Id+,+targetObjectid+FROM+ProcessInstance+where+id+in+("
 				+ processInstanceStr + ")";
 		System.out.println("query string===" + queryStr);
+		// remove duplicate code
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseURL + Constants.REST_URL + queryStr);
 		httpGet.addHeader(generateAuthHeader(accessToken));
@@ -329,6 +332,7 @@ public class SFUtility {
 				+ "'+AND+PublishStatus+=+'draft'+AND+Id+IN+("
 				+ targetObjectIdStr + ")";
 		System.out.println("query " + queryStr);
+		// remove duplicate code
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseURL + Constants.REST_URL + queryStr);
 		httpGet.addHeader(generateAuthHeader(accessToken));
@@ -343,6 +347,7 @@ public class SFUtility {
 				SFArticle sfArticle = new SFArticle();
 				JSONObject jsonObj = jsonArray.getJSONObject(i);
 				sfArticle.setId(jsonObj.getString("Id"));
+				sfArticle.setLanguage(locale);
 				sfArticle.setMasterVersionId(jsonObj
 						.getString("MasterVersionId"));
 				sfArticleList.add(sfArticle);
@@ -381,6 +386,7 @@ public class SFUtility {
 				+ sourceArticle.getType() + "__kav+where+Id+in+('"
 				+ sourceArticle.getMasterVersionId() + "')";
 		System.out.println("last query==" + queryStr);
+		// remove duplicate code
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseURL + Constants.REST_URL + queryStr);
 		httpGet.addHeader(generateAuthHeader(accessToken));
@@ -420,7 +426,7 @@ public class SFUtility {
 		JSONObject json = Utility.conevertStreamToJSON(stream);
 		StringEntity body = new StringEntity(json.toString(1));
 		body.setContentType("application/json");
-
+		// remove duplicate code
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpPatch httppatch = new HttpPatch(baseURL + Constants.REST_URL
 				+ queryStr);
@@ -433,6 +439,7 @@ public class SFUtility {
 		if (statusCode == 204) {
 			System.out.println("Record Inserted Succesufully");
 		} else {
+			System.out.println();
 			throw new Exception();
 		}
 

@@ -5,6 +5,7 @@ public class SFArticle {
     private String id;
     private String masterVersionId;
     private String type;
+    private String language;
 
     public String getId() {
 	return id;
@@ -34,5 +35,19 @@ public class SFArticle {
 	 */
 	public void setMasterVersionId(String masterVersionId) {
 		this.masterVersionId = masterVersionId;
+	}
+
+	/**
+	 * @return the language
+	 */
+	public String getLanguage() {
+		return language;
+	}
+
+	/**
+	 * @param language the language to set
+	 */
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 }

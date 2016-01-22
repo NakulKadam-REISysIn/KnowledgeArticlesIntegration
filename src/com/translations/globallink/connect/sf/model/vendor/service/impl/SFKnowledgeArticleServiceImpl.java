@@ -34,10 +34,8 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
 			String targetSFLocale, String articleType) throws Exception {
 
 		String accessToken = SFUtility.getAccessTokenFromSF();
-		String queueId = SFUtility.getQueueId(connectionConfig.getQueueName(),
-				accessToken, connectionConfig.getUrl());
 		List<String> processInstanceIdList = SFUtility.getProcessInstanceIds(
-				queueId, accessToken, connectionConfig.getUrl());
+				connectionConfig.getQueueName(), accessToken, connectionConfig.getUrl());
 		List<String> targetInstaceIdList = SFUtility
 				.getTargetobjectInstanceIds(processInstanceIdList, accessToken,
 						connectionConfig.getUrl());

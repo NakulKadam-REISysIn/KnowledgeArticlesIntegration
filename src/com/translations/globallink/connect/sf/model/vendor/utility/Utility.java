@@ -39,7 +39,7 @@ public class Utility {
 				.setConsumerKey("3MVG9ZL0ppGP5UrBR.600kPJSKldTpds6SxCgEgj44lSgMJAcU9C5etNsi9y5GusxXFEuSKd3m3oylBiXdNtR");
 		loginDetailBean.setConsumerSecret("5127982414795005574");
 		loginDetailBean.setUrl("https://ap2.salesforce.com");
-		loginDetailBean.setQueueName("UserQueue");
+		loginDetailBean.setQueueName("00G28000001Ep0T");
 		return loginDetailBean;
 	}
 
@@ -98,7 +98,19 @@ public class Utility {
 		Content content = new Content("SF", sourceArticle.getType(),
 				jsonObject.getString("Title"),
 				sourceArticle.getMasterVersionId());
-
+		
+		content.getFields().add(
+				new Field(sourceArticle.getId(),
+						"Id", "Id",
+						false, 18,
+						"Id", true));
+		
+		content.getFields().add(
+				new Field(sourceArticle.getLanguage(),
+						"Language", "Language",
+						false, 18,
+						"Text", true));
+		
 		for (SFArticleField sfArticle : metadataField) {
 			content.getFields().add(
 					new Field(jsonObject.getString(sfArticle.getName()),
@@ -129,12 +141,12 @@ public class Utility {
 		name2.setType("Id");
 		name2.setTransalate(false);
 
-		SFArticleField name3 = new SFArticleField();
-		name3.setLabel("Title");
-		name3.setLength(256);
-		name3.setName("Title");
-		name3.setType("Text");
-		name3.setTransalate(false);
+//		SFArticleField name3 = new SFArticleField();
+//		name3.setLabel("Title");
+//		name3.setLength(256);
+//		name3.setName("Title");
+//		name3.setType("Text");
+//		name3.setTransalate(false);
 
 		SFArticleField name6 = new SFArticleField();
 		name6.setLabel("KnowledgeArticleId");
@@ -164,8 +176,8 @@ public class Utility {
 //		name9.setType("Picklist");
 //		name9.setTransalate(false);
 
-		fields.add(name2);
-		fields.add(name3);
+//		fields.add(name2);
+	//	fields.add(name3);
 		fields.add(name6);
 		fields.add(name7);
 		fields.add(name8);
@@ -189,10 +201,17 @@ public class Utility {
 		name4.setName("Summary");
 		name4.setType("Text");
 		name4.setTransalate(true);
+		
+		SFArticleField name3 = new SFArticleField();
+		name3.setLabel("Title");
+		name3.setLength(256);
+		name3.setName("Title");
+		name3.setType("Text");
+		name3.setTransalate(true);
 
 		fields.add(name1);
 		fields.add(name4);
-
+		fields.add(name3);
 		return fields;
 
 	}

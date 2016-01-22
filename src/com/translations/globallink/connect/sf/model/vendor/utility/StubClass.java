@@ -41,9 +41,9 @@ public class StubClass {
 		List<SFArticle> ReadyArticleIdsForTranslation = sfKnowledgeArticleImpl
 				.getReadyArticleIdsForTranslation("fr", "offer");
 		for (SFArticle sfArticle : ReadyArticleIdsForTranslation) {
-			System.out.println(sfArticle.getId()
+			System.out.println("ArticleId:" + sfArticle.getId()
 					+ "==========MasterVersion Id:"
-					+ sfArticle.getMasterVersionId());
+					+ sfArticle.getMasterVersionId()+"=======language:"+sfArticle.getLanguage());
 
 		}
 
@@ -63,7 +63,9 @@ public class StubClass {
 					+ sfArticleObj.getMasterVersionId());
 			sfArticle = sfArticleObj;
 		}
+		
 		sfArticle.setType("offer");
+		sfArticle.setLanguage("fr");
 
 		List<SFArticleField> fieldsInfo = Utility.getSFArticleCustomFieldList();
 		InputStream ArticleStreamTransaltion = sfKnowledgeArticleImpl
@@ -83,7 +85,7 @@ public class StubClass {
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
 		SFArticle sfArticle = new SFArticle();
-		sfArticle.setId("ka028000000I5ASA0");
+		sfArticle.setId("ka028000000I5JZAA0");
 		sfArticle.setType("offer");
 		InputStream inputstream = new FileInputStream("E://input1.txt");
 		sfKnowledgeArticleImpl.importTranslatedArticle(sfArticle, null, inputstream);
