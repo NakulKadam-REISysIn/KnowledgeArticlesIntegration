@@ -1,28 +1,45 @@
 package com.translations.globallink.connect.sf.model.vendor.utility;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.util.List;
 
-import org.apache.http.entity.StringEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticle;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleField;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
+import com.translations.globallink.connect.sf.model.vendor.exception.CustomException;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.Content;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.Field;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.GloballinkContentXMLUtil;
+import com.translations.globallink.connect.sf.model.vendor.constants.Constants;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.json.JSONObject;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -31,6 +48,11 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 public class Utility {
+	/**
+	 * This method will be used to get data from middleWare.
+	 * 
+	 * @return loginDetailBean it rerun SFConnectionConfig data
+	 */
 	public static SFConnectionConfig getLoginDetailsFromMiddleware() {
 		SFConnectionConfig loginDetailBean = new SFConnectionConfig();
 		loginDetailBean.setUser("Nakul@ka.dev");
@@ -39,10 +61,18 @@ public class Utility {
 				.setConsumerKey("3MVG9ZL0ppGP5UrBR.600kPJSKldTpds6SxCgEgj44lSgMJAcU9C5etNsi9y5GusxXFEuSKd3m3oylBiXdNtR");
 		loginDetailBean.setConsumerSecret("5127982414795005574");
 		loginDetailBean.setUrl("https://ap2.salesforce.com");
-		loginDetailBean.setQueueName("00G28000001Ep0T");
+		loginDetailBean.setQueueName("00G28000001Ep0TEAS");
 		return loginDetailBean;
 	}
 
+	/**
+	 * Generate In clause for Ids.
+	 * 
+	 * @param strList
+	 *            list of string of ids
+	 * @return In clause string
+	 * 
+	 */
 	public static String generateInCluaseString(List<String> strList) {
 		String returnStr = "";
 		for (String str : strList) {
@@ -51,6 +81,13 @@ public class Utility {
 		return returnStr.substring(0, returnStr.length() - 1);
 	}
 
+	/**
+	 * Generate In clause for SFArticle
+	 * 
+	 * @param sfarticle
+	 *            It is List of SFArticle data type.
+	 * @return In clause string.
+	 */
 	public static String generateInCluaseStringForSFArticle(
 			List<SFArticle> sfarticle) {
 		String masterVersionIdStr = "";
@@ -63,19 +100,13 @@ public class Utility {
 		return masterVersionIdStr.substring(0, masterVersionIdStr.length() - 1);
 	}
 
-	public static StringEntity GenerateJsonBody() throws JSONException,
-			IOException {
-
-		JSONObject Article = new JSONObject();
-		Article.put("Title", "ffgggh");
-		Article.put("Name__c", "john cena");
-		Article.put("UrlName", "johncena123");
-		StringEntity body = new StringEntity(Article.toString(1));
-		body.setContentType("application/json");
-		return body;
-
-	}
-
+	/**
+	 * Generate In clause for SFArticleField.
+	 * 
+	 * @param fields
+	 *            List of SFArticleField data type.
+	 * @return In clause string
+	 */
 	public static String getFieldsStr(List<SFArticleField> fields) {
 		String fieldsStr = "";
 		for (SFArticleField str : fields) {
@@ -84,6 +115,20 @@ public class Utility {
 		return fieldsStr.substring(0, fieldsStr.length() - 3);
 	}
 
+	/**
+	 * Generate XML for given JSON
+	 * 
+	 * @param sourceArticle
+	 *            SFArticle data type fields for data.
+	 * @param customFields
+	 *            SFArticleField custom data for xml generation.
+	 * @param metadataField
+	 *            SFArticleField meta data for xml generation.
+	 * @param KAListjson
+	 *            JSONObject KAListjson for xml generation.
+	 * @return InputStream of xml data
+	 * @throws Exception
+	 */
 	public static InputStream generateXMLfromJSON(SFArticle sourceArticle,
 			List<SFArticleField> customFields,
 			List<SFArticleField> metadataField, JSONObject KAListjson)
@@ -98,19 +143,15 @@ public class Utility {
 		Content content = new Content("SF", sourceArticle.getType(),
 				jsonObject.getString("Title"),
 				sourceArticle.getMasterVersionId());
-		
+
 		content.getFields().add(
-				new Field(sourceArticle.getId(),
-						"Id", "Id",
-						false, 18,
-						"Id", true));
-		
+				new Field(sourceArticle.getId(), "Id", "Id", false, 18, "Id",
+						true));
+
 		content.getFields().add(
-				new Field(sourceArticle.getLanguage(),
-						"Language", "Language",
-						false, 18,
-						"Text", true));
-		
+				new Field(sourceArticle.getLanguage(), "Language", "Language",
+						false, 18, "Text", true));
+
 		for (SFArticleField sfArticle : metadataField) {
 			content.getFields().add(
 					new Field(jsonObject.getString(sfArticle.getName()),
@@ -133,89 +174,45 @@ public class Utility {
 
 	public static List<SFArticleField> getSFArticleMetadataFieldList() {
 		List<SFArticleField> fields = new ArrayList<SFArticleField>();
+		fields.add(new SFArticleField("Id", "Id", "Id", 36, false));
+		fields.add(new SFArticleField("KnowledgeArticleId",
+				"KnowledgeArticleId", "Id", 20, false));
+		fields.add(new SFArticleField("CreatedById", "CreatedById", "Id", 20,
+				false));
+		fields.add(new SFArticleField("MasterVersionId", "MasterVersionId",
+				"Id", 20, false));
 
-		SFArticleField name2 = new SFArticleField();
-		name2.setLabel("Id");
-		name2.setLength(36);
-		name2.setName("Id");
-		name2.setType("Id");
-		name2.setTransalate(false);
-
-//		SFArticleField name3 = new SFArticleField();
-//		name3.setLabel("Title");
-//		name3.setLength(256);
-//		name3.setName("Title");
-//		name3.setType("Text");
-//		name3.setTransalate(false);
-
-		SFArticleField name6 = new SFArticleField();
-		name6.setLabel("KnowledgeArticleId");
-		name6.setLength(20);
-		name6.setName("KnowledgeArticleId");
-		name6.setType("Id");
-		name6.setTransalate(false);
-
-		SFArticleField name7 = new SFArticleField();
-		name7.setLabel("OwnerId");
-		name7.setLength(20);
-		name7.setName("OwnerId");
-		name7.setType("Id");
-		name7.setTransalate(false);
-
-		SFArticleField name8 = new SFArticleField();
-		name8.setLabel("MasterVersionId");
-		name8.setLength(20);
-		name8.setName("MasterVersionId");
-		name8.setType("Id");
-		name8.setTransalate(false);
-//
-//		SFArticleField name9 = new SFArticleField();
-//		name9.setLabel("Language");
-//		name9.setLength(20);
-//		name9.setName("Language");
-//		name9.setType("Picklist");
-//		name9.setTransalate(false);
-
-//		fields.add(name2);
-	//	fields.add(name3);
-		fields.add(name6);
-		fields.add(name7);
-		fields.add(name8);
-		//fields.add(name9);
 		return fields;
+
 	}
 
 	// Dummy code
+	/**
+	 * hard code data insertion in the SFArticleField-custum fileds
+	 * 
+	 * @return
+	 */
 	public static List<SFArticleField> getSFArticleCustomFieldList() {
 		List<SFArticleField> fields = new ArrayList<SFArticleField>();
-		SFArticleField name1 = new SFArticleField();
-		name1.setLabel("name");
-		name1.setLength(256);
-		name1.setName("Name__c");
-		name1.setType("Text");
-		name1.setTransalate(true);
-
-		SFArticleField name4 = new SFArticleField();
-		name4.setLabel("Summary");
-		name4.setLength(1026);
-		name4.setName("Summary");
-		name4.setType("Text");
-		name4.setTransalate(true);
-		
-		SFArticleField name3 = new SFArticleField();
-		name3.setLabel("Title");
-		name3.setLength(256);
-		name3.setName("Title");
-		name3.setType("Text");
-		name3.setTransalate(true);
-
-		fields.add(name1);
-		fields.add(name4);
-		fields.add(name3);
+		fields.add(new SFArticleField("Name__c", "name", "Text", 256, true));
+		fields.add(new SFArticleField("Summary", "Summary", "Text", 1026, true));
+		fields.add(new SFArticleField("Title", "Title", "Text", 256, true));
 		return fields;
 
 	}
 
+	/**
+	 * generate json from xml file
+	 * 
+	 * @param inputStream
+	 *            inputStream of xml file
+	 * @return JSONObject of converted xml file
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws DOMException
+	 * @throws JSONException
+	 */
 	public static JSONObject conevertStreamToJSON(InputStream inputStream)
 			throws ParserConfigurationException, SAXException, IOException,
 			DOMException, JSONException {
@@ -234,4 +231,155 @@ public class Utility {
 		}
 		return article;
 	}
+
+	/**
+	 * 
+	 * @param baseURL
+	 *            crate Httpget method
+	 * @param queryStr
+	 *            query that pass in url
+	 * @param accessToken
+	 *            to add header using sdUtility
+	 * @return
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws CustomException
+	 */
+	public static String getHttpGetResponce(String baseURL, String queryStr,
+			String accessToken) throws  IOException,
+			CustomException {
+		URL url;
+		HttpsURLConnection connection = null;
+
+		url = new URL(baseURL + "/" + Constants.REST_URL + queryStr);
+
+		System.out.println("url1==  " + url);
+
+		connection = (HttpsURLConnection) url.openConnection();
+		connection.setRequestProperty("Authorization", "OAuth " + accessToken);
+		connection.setRequestProperty("accept", "application/json");
+		connection.setRequestMethod("GET");
+
+		connection.setRequestProperty("Content-Type",
+				"application/x-www-form-urlencoded");
+		connection.setRequestProperty("Content-Language", "en-US");
+		connection.setUseCaches(false);
+		connection.setDoInput(true);
+		connection.setDoOutput(true);
+
+		if (connection.getResponseCode() == Constants.SUCCESS_CODE) {
+			System.out.println("responcecode" + connection.getResponseCode());
+
+			InputStream is = connection.getInputStream();
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			String line;
+			StringBuffer response = new StringBuffer();
+			while ((line = rd.readLine()) != null) {
+				response.append(line);
+				response.append('\r');
+			}
+			rd.close();
+			return response.toString();
+		} else {
+			throw new CustomException(
+					"Issue while fetching targetObjectInstance Found:");
+		}
+
+	}
+
+	public static String getHttpPostResponce(SFConnectionConfig loginDetailBean)
+			throws IOException {
+		URL url;
+		HttpsURLConnection connection = null;
+		String urlParameters = "grant_type=password&client_id="
+				+ loginDetailBean.getConsumerKey() + "&client_secret="
+				+ loginDetailBean.getConsumerSecret() + "&username="
+				+ loginDetailBean.getUser() + "&password="
+				+ loginDetailBean.getPassword();
+
+		url = new URL("https://login.salesforce.com/services/oauth2/token");
+
+		connection = (HttpsURLConnection) url.openConnection();
+
+		connection.setRequestProperty("accept", "application/xml");
+
+		connection.setRequestMethod("POST");
+		connection.setRequestProperty("Content-Length",
+				"" + Integer.toString(urlParameters.getBytes().length));
+		connection.setRequestProperty("Content-Type",
+				"application/x-www-form-urlencoded");
+		connection.setRequestProperty("Content-Language", "en-US");
+		connection.setUseCaches(false);
+		connection.setDoInput(true);
+		connection.setDoOutput(true);
+		OutputStream os = connection.getOutputStream();
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,
+				"UTF-8"));
+		writer.write(urlParameters);
+		writer.flush();
+		writer.close();
+		os.close();
+
+		InputStream is = connection.getInputStream();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		String line;
+		StringBuffer response = new StringBuffer();
+		while ((line = rd.readLine()) != null) {
+			response.append(line);
+			response.append('\r');
+		}
+		rd.close();
+		return response.toString();
+
+	}
+
+	public static void getHttpPachResponce(String baseURL, String queryStr,
+			String accessToken, String body) throws IOException, IOException {
+		URL url;
+		HttpsURLConnection connection = null;
+		String urlParameters = "Title=niranjan123";
+		url = new URL(baseURL + "/" + Constants.REST_URL + queryStr+"&access_token=" + accessToken);
+		System.out.println("url====" + url);
+		connection = (HttpsURLConnection) url.openConnection();
+		//connection.setRequestProperty("Authorization", "OAuth " + accessToken);
+		connection.setRequestMethod("PUT");
+		connection.setRequestProperty("Content-Length",
+				"" + Integer.toString(urlParameters.getBytes().length));
+		connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+		connection.setRequestProperty("Content-Language", "en-US");
+		connection.setUseCaches(false);
+		connection.setDoInput(true);
+		connection.setDoOutput(true);
+		 OutputStream os = connection.getOutputStream();
+	        os.write(urlParameters.getBytes());
+	        os.flush();
+		
+		System.out.println("responce code" + connection.getResponseCode());
+
+	}
+
+	public static String getSessionId(String loingResponse) {
+		java.io.InputStream sbis = new java.io.StringBufferInputStream(
+				loingResponse.toString());
+		javax.xml.parsers.DocumentBuilderFactory b = javax.xml.parsers.DocumentBuilderFactory
+				.newInstance();
+		b.setNamespaceAware(false);
+		org.w3c.dom.Document doc = null;
+		javax.xml.parsers.DocumentBuilder db = null;
+		try {
+			db = b.newDocumentBuilder();
+			doc = db.parse(sbis);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		org.w3c.dom.Element element = doc.getDocumentElement();
+		String access_token = "";
+		NodeList nodeList = element.getElementsByTagName("access_token");
+		if (nodeList != null && nodeList.getLength() > 0) {
+			Element myElement = (Element) nodeList.item(0);
+			access_token = myElement.getFirstChild().getNodeValue();
+		}
+		return access_token;
+	}
+
 }

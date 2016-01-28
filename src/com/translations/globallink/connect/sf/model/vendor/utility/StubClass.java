@@ -8,7 +8,10 @@ import java.util.List;
 
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticle;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleField;
+import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleType;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
+import com.translations.globallink.connect.sf.model.vendor.dto.SFLocale;
+import com.translations.globallink.connect.sf.model.vendor.dto.SFQueue;
 import com.translations.globallink.connect.sf.model.vendor.service.SFKnowledgeArticleService;
 import com.translations.globallink.connect.sf.model.vendor.service.impl.SFKnowledgeArticleServiceImpl;
 
@@ -27,10 +30,50 @@ public class StubClass {
 	 */
 
 	public static void main(String[] args) throws Exception {
-		//callgetReadyArticleIdsForTranslation();//after translation
-		 callgetArticleStreamForTranslation();//before transaltion
-		 //callimportTranslatedArticle();
+		 //callgetReadyArticleIdsForTranslation();//after translation
+		callgetArticleStreamForTranslation();// before transaltion
+		//callimportTranslatedArticle();
+		//callgetSFQueues();
+		//callgetSFLocales();
+		//callgettype();
+		
+		
 
+	}
+
+	public static void callgettype() throws Exception {
+		SFConnectionConfig sfConnectionConfig = Utility
+				.getLoginDetailsFromMiddleware();
+		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
+				sfConnectionConfig);
+		List<SFArticleType> sfType=sfKnowledgeArticleImpl.getArticleTypes();
+		
+	}
+
+	public static void callgetSFLocales() throws Exception {
+		SFConnectionConfig sfConnectionConfig = Utility
+				.getLoginDetailsFromMiddleware();
+		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
+				sfConnectionConfig);
+		List<SFLocale> lang= sfKnowledgeArticleImpl.getSFLocales();
+		for (SFLocale locale : lang) {
+			System.out.println("Id:" + locale.getCode()
+					+" Name:"+locale.getLabel());			
+		}
+		
+	}
+
+	public static void callgetSFQueues() throws Exception {
+		SFConnectionConfig sfConnectionConfig = Utility
+				.getLoginDetailsFromMiddleware();
+		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
+				sfConnectionConfig);
+		List<SFQueue> sfqueue=sfKnowledgeArticleImpl.getSFQueues();
+		for (SFQueue sfArticle : sfqueue) {
+			System.out.println("Id:" + sfArticle.getQueueId()
+					+" Name:"+sfArticle.getQueueName());			
+		}
+		
 	}
 
 	public static void callgetReadyArticleIdsForTranslation() throws Exception {
@@ -43,7 +86,8 @@ public class StubClass {
 		for (SFArticle sfArticle : ReadyArticleIdsForTranslation) {
 			System.out.println("ArticleId:" + sfArticle.getId()
 					+ "==========MasterVersion Id:"
-					+ sfArticle.getMasterVersionId()+"=======language:"+sfArticle.getLanguage());
+					+ sfArticle.getMasterVersionId() + "=======language:"
+					+ sfArticle.getLanguage());
 
 		}
 
@@ -63,7 +107,7 @@ public class StubClass {
 					+ sfArticleObj.getMasterVersionId());
 			sfArticle = sfArticleObj;
 		}
-		
+
 		sfArticle.setType("offer");
 		sfArticle.setLanguage("fr");
 
@@ -88,6 +132,7 @@ public class StubClass {
 		sfArticle.setId("ka028000000I5JZAA0");
 		sfArticle.setType("offer");
 		InputStream inputstream = new FileInputStream("E://input1.txt");
-		sfKnowledgeArticleImpl.importTranslatedArticle(sfArticle, null, inputstream);
+		sfKnowledgeArticleImpl.importTranslatedArticle(sfArticle, null,
+				inputstream);
 	}
 }

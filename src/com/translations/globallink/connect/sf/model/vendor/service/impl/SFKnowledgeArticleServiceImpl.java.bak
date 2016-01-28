@@ -100,15 +100,7 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
 	}
 
 	public List<SFLocale> getSFLocales() throws Exception {
-		String accessToken = SFUtility.getAccessTokenFromSF();
-		List<SFLocale> sflanguage=SFUtility.getlang("knowledgeArticleType", accessToken, connectionConfig.getUrl());
-		return sflanguage;
-	} 
-
-	
-	public List<SFQueue> getSFQueues() throws Exception {
-		String accessToken = SFUtility.getAccessTokenFromSF();
-		List<SFQueue> getQueueList=SFUtility.SFQueueList(accessToken, connectionConfig.getUrl());
-		return getQueueList;
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

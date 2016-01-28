@@ -71,11 +71,6 @@ public interface SFKnowledgeArticleService {
 	 */
 	public List<SFLocale> getSFLocales() throws Exception;
 	
-	/**
-	 * @return List of SFQueue populated with all the configured Queues in
-	 *         SalesForce
-	 * @throws Exception
-	 */
 	public List<SFQueue> getSFQueues() throws Exception;
 
 }

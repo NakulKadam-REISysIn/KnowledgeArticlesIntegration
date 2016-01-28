@@ -7,14 +7,6 @@ public class SFArticleField {
     private String type;
     private int length;
     private boolean transalate;
-    
-    public SFArticleField(String name, String label, String type, int length, boolean transalate){
-    	this.name = name;
-    	this.label = label;
-    	this.type= type;
-    	this.length=length;
-    	this.transalate=transalate;
-    }
 
     public String getName() {
 	return name;
