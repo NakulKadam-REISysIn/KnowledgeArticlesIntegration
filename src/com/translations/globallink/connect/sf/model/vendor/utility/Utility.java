@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.List;
 
@@ -174,7 +176,7 @@ public class Utility {
 
 	public static List<SFArticleField> getSFArticleMetadataFieldList() {
 		List<SFArticleField> fields = new ArrayList<SFArticleField>();
-		fields.add(new SFArticleField("Id", "Id", "Id", 36, false));
+		//fields.add(new SFArticleField("Id", "Id", "Id", 36, false));
 		fields.add(new SFArticleField("KnowledgeArticleId",
 				"KnowledgeArticleId", "Id", 20, false));
 		fields.add(new SFArticleField("CreatedById", "CreatedById", "Id", 20,
@@ -333,29 +335,85 @@ public class Utility {
 
 	}
 
-	public static void getHttpPachResponce(String baseURL, String queryStr,
-			String accessToken, String body) throws IOException, IOException {
+	public static void getHttpPatchResponce(String baseURL, String queryStr,
+			String accessToken, String body) throws IOException, IOException, CustomException {
+		
 		URL url;
 		HttpsURLConnection connection = null;
-		String urlParameters = "Title=niranjan123";
-		url = new URL(baseURL + "/" + Constants.REST_URL + queryStr+"&access_token=" + accessToken);
-		System.out.println("url====" + url);
+		url = new URL(baseURL + Constants.REST_URL + queryStr);
 		connection = (HttpsURLConnection) url.openConnection();
-		//connection.setRequestProperty("Authorization", "OAuth " + accessToken);
-		connection.setRequestMethod("PUT");
-		connection.setRequestProperty("Content-Length",
-				"" + Integer.toString(urlParameters.getBytes().length));
-		connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-		connection.setRequestProperty("Content-Language", "en-US");
+		connection.setRequestProperty("Authorization", "OAuth " +
+		 accessToken);
+		setRequestMethodUsingWorkaround(connection, "PATCH");
+		connection.setRequestProperty("Content-Type","application/json");
 		connection.setUseCaches(false);
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
-		 OutputStream os = connection.getOutputStream();
-	        os.write(urlParameters.getBytes());
-	        os.flush();
+		OutputStream os = connection.getOutputStream();
+		os.write(body.getBytes());
 		
-		System.out.println("responce code" + connection.getResponseCode());
+		os.flush();
+		os.close();
+		
+		InputStream is = connection.getInputStream();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		String line;
+		StringBuffer response = new StringBuffer();
+		while ((line = rd.readLine()) != null) {
+			response.append(line);
+			response.append('\r');
+		}
+		rd.close();
+		//return response.toString();
+		if(connection.getResponseCode() != 204){
+			throw new CustomException("Error while update knowledge article Id");
+		}
 
+		System.out.println("responce code  " + connection.getResponseCode()
+				+ "  " + connection.getResponseMessage()+" Message :"+response.toString());
+
+	}
+	
+	private static final void setRequestMethodUsingWorkaround(
+			final HttpURLConnection httpURLConnection, final String method) {
+		try {
+			httpURLConnection.setRequestMethod(method);
+			// Check whether we are running on a buggy JRE
+		} catch (final ProtocolException pe) {
+			Class<?> connectionClass = httpURLConnection
+					.getClass();
+			java.lang.reflect.Field delegateField = null;
+			try {
+				delegateField = connectionClass.getDeclaredField("delegate");
+				delegateField.setAccessible(true);
+				HttpURLConnection delegateConnection = (HttpURLConnection) delegateField
+						.get(httpURLConnection);
+				setRequestMethodUsingWorkaround(delegateConnection, method);
+			} catch (NoSuchFieldException e) {
+				// Ignore for now, keep going
+			} catch (IllegalArgumentException e) {
+				throw new RuntimeException(e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+			try {
+				java.lang.reflect.Field methodField;
+				while (connectionClass != null) {
+					try {
+						methodField = connectionClass
+								.getDeclaredField("method");
+					} catch (NoSuchFieldException e) {
+						connectionClass = connectionClass.getSuperclass();
+						continue;
+					}
+					methodField.setAccessible(true);
+					methodField.set(httpURLConnection, method);
+					break;
+				}
+			} catch (final Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	public static String getSessionId(String loingResponse) {

@@ -30,8 +30,8 @@ public class StubClass {
 	 */
 
 	public static void main(String[] args) throws Exception {
-		 //callgetReadyArticleIdsForTranslation();//after translation
-		callgetArticleStreamForTranslation();// before transaltion
+		 callgetReadyArticleIdsForTranslation();//after translation
+		//callgetArticleStreamForTranslation();// before transaltion
 		//callimportTranslatedArticle();
 		//callgetSFQueues();
 		//callgetSFLocales();
@@ -87,9 +87,11 @@ public class StubClass {
 			System.out.println("ArticleId:" + sfArticle.getId()
 					+ "==========MasterVersion Id:"
 					+ sfArticle.getMasterVersionId() + "=======language:"
-					+ sfArticle.getLanguage());
+					+ sfArticle.getLanguage()+"=====Type:"+sfArticle.getType());
 
 		}
+		
+	
 
 	}
 
@@ -121,6 +123,7 @@ public class StubClass {
 		while ((read = br.readLine()) != null) {
 			System.out.println(read);
 		}
+		//HttpPost h;
 	}
 
 	public static void callimportTranslatedArticle() throws Exception {
@@ -131,7 +134,7 @@ public class StubClass {
 		SFArticle sfArticle = new SFArticle();
 		sfArticle.setId("ka028000000I5JZAA0");
 		sfArticle.setType("offer");
-		InputStream inputstream = new FileInputStream("E://input1.txt");
+		InputStream inputstream = new FileInputStream("D://input1.txt");
 		sfKnowledgeArticleImpl.importTranslatedArticle(sfArticle, null,
 				inputstream);
 	}

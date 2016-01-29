@@ -267,6 +267,7 @@ public class SFUtility {
 			sfArticle.setId(jsonObj.getString("Id"));
 			sfArticle.setLanguage(locale);
 			sfArticle.setMasterVersionId(jsonObj.getString("MasterVersionId"));
+			sfArticle.setType(articleType);
 			sfArticleList.add(sfArticle);
 		}
 
@@ -335,7 +336,7 @@ public class SFUtility {
 		String body = json.toString();
 		//body.setContentType("application/json");
 		
-		Utility.getHttpPachResponce(baseURL, queryStr,
+		Utility.getHttpPatchResponce(baseURL, queryStr,
 				accessToken, body);
 		
 
