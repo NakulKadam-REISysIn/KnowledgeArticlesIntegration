@@ -111,4 +111,10 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
 		List<SFQueue> getQueueList=SFUtility.SFQueueList(accessToken, connectionConfig.getUrl());
 		return getQueueList;
 	}
+
+    @Override
+    public boolean testConnection(SFConnectionConfig config) throws Exception {
+	// TODO Auto-generated method stub
+	return false;
+    }
 }

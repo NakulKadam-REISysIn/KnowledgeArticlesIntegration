@@ -6,6 +6,7 @@ import java.util.List;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticle;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleField;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleType;
+import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFLocale;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFQueue;
 
@@ -77,5 +78,12 @@ public interface SFKnowledgeArticleService {
 	 * @throws Exception
 	 */
 	public List<SFQueue> getSFQueues() throws Exception;
+	
+	/**
+	 * @param config SalesForce Connection details
+	 * @return Success or Failure
+	 * @throws Exception
+	 */
+	public boolean testConnection(SFConnectionConfig config) throws Exception;
 
 }
