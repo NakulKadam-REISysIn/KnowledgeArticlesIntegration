@@ -87,34 +87,31 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
 
 	// Phase II implementation
 	public List<SFArticleType> getArticleTypes() throws Exception {
-		String accessToken = SFUtility.getAccessTokenFromSF();
-		List<SFArticleType> sfType=SFUtility.gettype(accessToken, connectionConfig.getUrl());
-		return sfType;
+		return SFUtility.gettype(SFUtility.getAccessTokenFromSF(), connectionConfig.getUrl());
 		
 	}
 
 	public List<SFArticleField> getFieldsForArticleType(String articleTypeName)
 			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return SFUtility.FieldsForArticleType(articleTypeName, SFUtility.getAccessTokenFromSF(), connectionConfig.getUrl());
 	}
 
 	public List<SFLocale> getSFLocales() throws Exception {
-		String accessToken = SFUtility.getAccessTokenFromSF();
-		List<SFLocale> sflanguage=SFUtility.getlang("knowledgeArticleType", accessToken, connectionConfig.getUrl());
-		return sflanguage;
+		return SFUtility.getlocales(SFUtility.getAccessTokenFromSF(), connectionConfig.getUrl());
 	} 
 
 	
 	public List<SFQueue> getSFQueues() throws Exception {
-		String accessToken = SFUtility.getAccessTokenFromSF();
-		List<SFQueue> getQueueList=SFUtility.SFQueueList(accessToken, connectionConfig.getUrl());
-		return getQueueList;
+		return SFUtility.SFQueueList(SFUtility.getAccessTokenFromSF(), connectionConfig.getUrl());
 	}
 
-    @Override
-    public boolean testConnection(SFConnectionConfig config) throws Exception {
-	// TODO Auto-generated method stub
-	return false;
+   
+    public boolean testConnection(SFConnectionConfig config) {
+    	try{
+    		SFUtility.getAccessTokenFromSF();
+    		return true;
+    	} catch(Exception ex){
+    		return false;
+    	}
     }
 }

@@ -30,14 +30,49 @@ public class StubClass {
 	 */
 
 	public static void main(String[] args) throws Exception {
-		 callgetReadyArticleIdsForTranslation();//after translation
-		//callgetArticleStreamForTranslation();// before transaltion
-		//callimportTranslatedArticle();
-		//callgetSFQueues();
-		//callgetSFLocales();
-		//callgettype();
-		
-		
+		// callgetReadyArticleIdsForTranslation();//after translation
+		// callgetArticleStreamForTranslation();// before transaltion
+		// callimportTranslatedArticle();
+		 callgetSFQueues();
+		// callgetSFLocales();
+		// callgettype();
+		// callgetFieldsForArticleType();
+		//calltestConnection();
+
+	}
+
+	public static void calltestConnection() throws Exception {
+		SFConnectionConfig sfConnectionConfig = Utility
+				.getLoginDetailsFromMiddleware();
+		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
+				sfConnectionConfig);
+		boolean testconnection = sfKnowledgeArticleImpl
+				.testConnection(sfConnectionConfig);
+		if (testconnection) {
+			System.out.println("Succesfully login!!!!");
+		} else {
+			System.out.println("login Fail!!!!");
+		}
+
+	}
+
+	public static void callgetFieldsForArticleType() throws Exception {
+		SFConnectionConfig sfConnectionConfig = Utility
+				.getLoginDetailsFromMiddleware();
+		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
+				sfConnectionConfig);
+		List<SFArticleField> sfTypefields = sfKnowledgeArticleImpl
+				.getFieldsForArticleType("offer__kav");
+		for (SFArticleField sfarticle : sfTypefields) {
+			if (!(sfarticle.getName().contentEquals("UrlName"))
+					&& !(sfarticle.getName().contentEquals("ArticleNumber"))) {
+				System.out.println("name " + sfarticle.getName() + "  label "
+						+ sfarticle.getLabel() + "  Lenght "
+						+ sfarticle.getLength() + "  Type "
+						+ sfarticle.getType());
+			}
+
+		}
 
 	}
 
@@ -46,8 +81,16 @@ public class StubClass {
 				.getLoginDetailsFromMiddleware();
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
-		List<SFArticleType> sfType=sfKnowledgeArticleImpl.getArticleTypes();
-		
+		List<SFArticleType> sfTypes = sfKnowledgeArticleImpl.getArticleTypes();
+		for(SFArticleType sfArticle : sfTypes){
+			System.out.println(sfArticle.getLabel() + "======" + sfArticle.getName());
+			if(sfArticle.getFields() != null)
+			for(SFArticleField sf: sfArticle.getFields()){
+				System.out.println(sf.getLabel() + "======" + sf.getLength() + "======" + sf.getName() + "====" + sf.getType());
+				
+			}
+		}
+
 	}
 
 	public static void callgetSFLocales() throws Exception {
@@ -55,12 +98,12 @@ public class StubClass {
 				.getLoginDetailsFromMiddleware();
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
-		List<SFLocale> lang= sfKnowledgeArticleImpl.getSFLocales();
+		List<SFLocale> lang = sfKnowledgeArticleImpl.getSFLocales();
 		for (SFLocale locale : lang) {
-			System.out.println("Id:" + locale.getCode()
-					+" Name:"+locale.getLabel());			
+			System.out.println("Id:" + locale.getCode() + " Name:"
+					+ locale.getLabel());
 		}
-		
+
 	}
 
 	public static void callgetSFQueues() throws Exception {
@@ -68,12 +111,12 @@ public class StubClass {
 				.getLoginDetailsFromMiddleware();
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
-		List<SFQueue> sfqueue=sfKnowledgeArticleImpl.getSFQueues();
+		List<SFQueue> sfqueue = sfKnowledgeArticleImpl.getSFQueues();
 		for (SFQueue sfArticle : sfqueue) {
-			System.out.println("Id:" + sfArticle.getQueueId()
-					+" Name:"+sfArticle.getQueueName());			
+			System.out.println("Id:" + sfArticle.getQueueId() + " Name:"
+					+ sfArticle.getQueueName());
 		}
-		
+
 	}
 
 	public static void callgetReadyArticleIdsForTranslation() throws Exception {
@@ -87,11 +130,10 @@ public class StubClass {
 			System.out.println("ArticleId:" + sfArticle.getId()
 					+ "==========MasterVersion Id:"
 					+ sfArticle.getMasterVersionId() + "=======language:"
-					+ sfArticle.getLanguage()+"=====Type:"+sfArticle.getType());
+					+ sfArticle.getLanguage() + "=====Type:"
+					+ sfArticle.getType());
 
 		}
-		
-	
 
 	}
 
@@ -123,7 +165,7 @@ public class StubClass {
 		while ((read = br.readLine()) != null) {
 			System.out.println(read);
 		}
-		//HttpPost h;
+
 	}
 
 	public static void callimportTranslatedArticle() throws Exception {
@@ -134,7 +176,7 @@ public class StubClass {
 		SFArticle sfArticle = new SFArticle();
 		sfArticle.setId("ka028000000I5JZAA0");
 		sfArticle.setType("offer");
-		InputStream inputstream = new FileInputStream("D://input1.txt");
+		InputStream inputstream = new FileInputStream("E://input1.txt");
 		sfKnowledgeArticleImpl.importTranslatedArticle(sfArticle, null,
 				inputstream);
 	}

@@ -3,13 +3,11 @@ package com.translations.globallink.connect.sf.model.vendor.utility;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,27 +54,6 @@ public class SFUtility {
 	}
 
 	/**
-	 * 
-	 * @param accessToken
-	 *            To Access the org it required aceessToken for REST call
-	 * @return BasicHeader object Using accessToken generate BasicHeader object
-	 *         that get return
-	 */
-
-	/*public static BasicHeader generateAuthHeader(String accessToken) {
-		return new BasicHeader("Authorization", "OAuth " + accessToken);
-	}*/
-
-	/**
-	 * 
-	 * @return BasicHeader Object Craeting Object with X-PrettyPrint and get
-	 *         return
-	 */
-	/*public static BasicHeader generatePrettyPrintHeader() {
-		return new BasicHeader("X-PrettyPrint", "1");
-	}*/
-
-	/**
 	 * @return accessToken return accesstoken String after login into
 	 *         salesforce.
 	 * 
@@ -89,22 +66,13 @@ public class SFUtility {
 	 * @throws CustomException
 	 */
 	public static String getAccessTokenFromSF() throws JSONException,
-			 IOException, CustomException {
+			IOException, CustomException {
 
 		SFConnectionConfig loginDetailBean = Utility
 				.getLoginDetailsFromMiddleware();
 		String loingResponse = Utility.getHttpPostResponce(loginDetailBean);
 		String accessToken = Utility.getSessionId(loingResponse);
 		System.out.println("json    " + accessToken);
-		/*
-		 * 
-		 * if (response.getStatusLine().getStatusCode() == 200) { String
-		 * response_string = EntityUtils.toString(response.getEntity());
-		 * JSONObject json = new JSONObject(response_string); accessToken =
-		 * json.getString(Constants.ACCESS_TOKEN); } else { throw new
-		 * CustomException(
-		 * "Unable to connect salesforce org. Please check configurations."); }
-		 */
 		return accessToken;
 	}
 
@@ -133,11 +101,12 @@ public class SFUtility {
 	 * 
 	 */
 	public static List<String> getProcessInstanceIds(String developerQueueId,
-			String accessToken, String baseURL) throws 
-			IOException, JSONException, CustomException {
+			String accessToken, String baseURL) throws IOException,
+			JSONException, CustomException {
 		System.out.println("inside getProcessInstanceIds");
 		List<String> processInstanceIdList = new ArrayList<String>();
-		// we are thinking of using XML files to configure all the queries and read it from there - low priority.
+		// we are thinking of using XML files to configure all the queries and
+		// read it from there - low priority.
 		String queryStr = "query?q=SELECT+ProcessInstanceId+FROM+ProcessInstanceWorkitem+where+ActorId=+'"
 				+ developerQueueId + "'";
 
@@ -147,7 +116,6 @@ public class SFUtility {
 		JSONObject processInstanceIdListJSON = new JSONObject(response);
 		JSONArray jsonObjArray = processInstanceIdListJSON
 				.getJSONArray("records");
-		System.out.println("josn==" + jsonObjArray.length());
 		// If no records found , return empty list
 		if (jsonObjArray.length() == 0) {
 			return new ArrayList<String>();
@@ -185,9 +153,7 @@ public class SFUtility {
 	 */
 	public static List<String> getTargetobjectInstanceIds(
 			List<String> processInstanceIdList, String accessToken,
-			String baseURL) throws  IOException,
-			JSONException, CustomException {
-		System.out.println("inside getTargetobjectInstanceIds");
+			String baseURL) throws IOException, JSONException, CustomException {
 		if (processInstanceIdList.size() == 0) {
 			return new ArrayList<String>();
 		}
@@ -241,7 +207,6 @@ public class SFUtility {
 	public static List<SFArticle> getKnowLedgeArticlesTranslatedVersions(
 			List<String> targetobjectInstanceIdList, String articleType,
 			String accessToken, String baseURL, String locale) throws Exception {
-		System.out.println("inside getKnowLedgeArticlesTranslatedVersions");
 		if (targetobjectInstanceIdList.size() == 0) {
 			return new ArrayList<SFArticle>();
 		}
@@ -294,7 +259,6 @@ public class SFUtility {
 			SFArticle sourceArticle, List<SFArticleField> fields,
 			String accessToken, String baseURL) throws Exception {
 		// todo - Add metadata fields hardcoded
-		System.out.println("inside getKnowLedgeArticlesRecords");
 		List<SFArticleField> metadataFields = Utility
 				.getSFArticleMetadataFieldList();
 
@@ -331,85 +295,103 @@ public class SFUtility {
 			throws Exception {
 		String queryStr = "sobjects/" + sourceArticle.getType() + "__kav" + "/"
 				+ sourceArticle.getId();
-		System.out.println("query== " + queryStr);
 		JSONObject json = Utility.conevertStreamToJSON(stream);
 		String body = json.toString();
-		//body.setContentType("application/json");
-		
-		Utility.getHttpPatchResponce(baseURL, queryStr,
-				accessToken, body);
-		
+		// body.setContentType("application/json");
+
+		Utility.getHttpPatchResponce(baseURL, queryStr, accessToken, body);
 
 	}
 
 	public static List<SFQueue> SFQueueList(String accessToken, String baseURL)
-			throws CustomException, JSONException, 
-			Exception {
+			throws CustomException, JSONException, Exception {
 		List<SFQueue> queueList = new ArrayList<SFQueue>();
 		String queryStr = "query?q=SELECT+Id+,+name+FROM+Group+WHERE+Type+=+'Queue'";
 		String response = Utility.getHttpGetResponce(baseURL, queryStr,
 				accessToken);
-
+				
 		JSONObject queueIdListJSON = new JSONObject((response));
-
 		JSONArray jsonObjArray = queueIdListJSON.getJSONArray("records");
-
 		for (int i = 0; i < jsonObjArray.length(); i++) {
 			SFQueue sfQueue = new SFQueue();
-
 			sfQueue.setQueueId(jsonObjArray.getJSONObject(i).getString("Id"));
 			sfQueue.setQueueName(jsonObjArray.getJSONObject(i)
 					.getString("Name"));
 			queueList.add(sfQueue);
-
 		}
-
 		return queueList;
 
 	}
 
-	public static List<SFLocale> getlang(String knowledgeArticleType,
-			String accessToken, String baseURL) throws 
-			IOException, JSONException, CustomException {
+	public static List<SFLocale> getlocales(String accessToken, String baseURL)
+			throws IOException, JSONException, CustomException {
 		List<SFLocale> Languages = new ArrayList<SFLocale>();
-		String queryStr = "sobjects/Offer__kav/describe";
+		String queryStr = Constants.GET_LANG_QUERY;
 		String response = Utility.getHttpGetResponce(baseURL, queryStr,
 				accessToken);
 		JSONObject json = new JSONObject(response);
-		JSONArray jsonArray = json.getJSONArray("fields").getJSONObject(17)
+		JSONArray jsonArray = json.getJSONArray("fields").getJSONObject(3)
 				.getJSONArray("picklistValues");
-
-		for (int i = 0; i < json.getJSONArray("fields").getJSONObject(17)
-				.getJSONArray("picklistValues").length(); i++) {
-
+		for (int i = 0; i < jsonArray.length(); i++) {
 			SFLocale lang = new SFLocale();
 			lang.setCode(jsonArray.getJSONObject(i).getString("value"));
 			lang.setLabel(jsonArray.getJSONObject(i).getString("label"));
 			Languages.add(lang);
-
 		}
-
 		return Languages;
 	}
 
 	public static List<SFArticleType> gettype(String accessToken, String baseURL)
-			throws  IOException, JSONException,
-			CustomException {
+			throws IOException, JSONException, CustomException {
 		List<SFArticleType> type = new ArrayList<SFArticleType>();
-		String queryStr = "sobjects";
+		String queryStr = Constants.GET_OBJ_QUERY;
 
 		String response = Utility.getHttpGetResponce(baseURL, queryStr,
 				accessToken);
+		
 		JSONObject json = new JSONObject(response);
-
-		System.out.println("json" + json.getJSONArray("sobjects"));
-		for (int i = 0; i < json.getJSONArray("sobjects").length(); i++) {
-			System.out.println("object="
-					+ json.getJSONArray("sobjects").getJSONObject(i)
-							.getString("name"));
-
+		JSONArray josnArray =json.getJSONArray("sobjects");
+		if(josnArray.length() == 0){
+			return new ArrayList<SFArticleType>();
 		}
-
+		for (int i = 0; i < josnArray.length(); i++) {
+			String kaType = josnArray.getJSONObject(i)
+					.getString("name");
+			if (kaType.endsWith("__kav")) {
+				SFArticleType sfarticle = new SFArticleType();
+				sfarticle.setLabel(josnArray.getJSONObject(i).getString("label"));
+				sfarticle.setName(kaType);
+				type.add(sfarticle);
+			}
+		}
 		return type;
+	}
+
+	public static List<SFArticleField> FieldsForArticleType(
+			String knowledgeArticleType, String accessToken, String baseURL)
+			throws IOException, Exception {
+		List<SFArticleField> articleFields = new ArrayList<SFArticleField>();
+		String queryStr = "sobjects/" + knowledgeArticleType + "/describe";
+		String response = Utility.getHttpGetResponce(baseURL, queryStr,
+				accessToken);
+		JSONObject json = new JSONObject(response);
+		JSONArray jsonArray = json.getJSONArray("fields");
+		Set<String> typeList = new HashSet<String>();
+		typeList.add("string");
+		typeList.add("Long Text Area");
+		typeList.add("textarea");
+		typeList.add("Rich Text Area");
+		for (int i = 0; i < jsonArray.length(); i++) {
+			String typeStr = jsonArray.getJSONObject(i).getString("type");
+			if (typeList.contains(typeStr)) {
+				articleFields.add( new SFArticleField(jsonArray
+						.getJSONObject(i).getString("name"), jsonArray
+						.getJSONObject(i).getString("label"), jsonArray
+						.getJSONObject(i).getString("type"), jsonArray
+						.getJSONObject(i).getInt("length"), true) );
+			}
+		}
+		return articleFields;
+
 	}
 }

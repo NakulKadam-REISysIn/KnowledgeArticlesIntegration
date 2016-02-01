@@ -25,18 +25,7 @@ import com.translations.globallink.connect.sf.model.vendor.utility.xml.Field;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.GloballinkContentXMLUtil;
 import com.translations.globallink.connect.sf.model.vendor.constants.Constants;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -176,7 +165,7 @@ public class Utility {
 
 	public static List<SFArticleField> getSFArticleMetadataFieldList() {
 		List<SFArticleField> fields = new ArrayList<SFArticleField>();
-		//fields.add(new SFArticleField("Id", "Id", "Id", 36, false));
+		// fields.add(new SFArticleField("Id", "Id", "Id", 36, false));
 		fields.add(new SFArticleField("KnowledgeArticleId",
 				"KnowledgeArticleId", "Id", 20, false));
 		fields.add(new SFArticleField("CreatedById", "CreatedById", "Id", 20,
@@ -248,22 +237,18 @@ public class Utility {
 	 * @throws CustomException
 	 */
 	public static String getHttpGetResponce(String baseURL, String queryStr,
-			String accessToken) throws  IOException,
-			CustomException {
+			String accessToken) throws IOException, CustomException {
 		URL url;
 		HttpsURLConnection connection = null;
 
 		url = new URL(baseURL + "/" + Constants.REST_URL + queryStr);
-
-		System.out.println("url1==  " + url);
-
 		connection = (HttpsURLConnection) url.openConnection();
 		connection.setRequestProperty("Authorization", "OAuth " + accessToken);
-		connection.setRequestProperty("accept", "application/json");
+		connection.setRequestProperty("accept", Constants.ACCEPT_STRING);
 		connection.setRequestMethod("GET");
 
 		connection.setRequestProperty("Content-Type",
-				"application/x-www-form-urlencoded");
+				Constants.CONTENT_TYPE_VAL);
 		connection.setRequestProperty("Content-Language", "en-US");
 		connection.setUseCaches(false);
 		connection.setDoInput(true);
@@ -299,17 +284,14 @@ public class Utility {
 				+ loginDetailBean.getUser() + "&password="
 				+ loginDetailBean.getPassword();
 
-		url = new URL("https://login.salesforce.com/services/oauth2/token");
-
+		url = new URL(Constants.POST_LOGIN_URL);
 		connection = (HttpsURLConnection) url.openConnection();
-
 		connection.setRequestProperty("accept", "application/xml");
-
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Content-Length",
 				"" + Integer.toString(urlParameters.getBytes().length));
 		connection.setRequestProperty("Content-Type",
-				"application/x-www-form-urlencoded");
+				Constants.CONTENT_TYPE_VAL);
 		connection.setRequestProperty("Content-Language", "en-US");
 		connection.setUseCaches(false);
 		connection.setDoInput(true);
@@ -336,25 +318,24 @@ public class Utility {
 	}
 
 	public static void getHttpPatchResponce(String baseURL, String queryStr,
-			String accessToken, String body) throws IOException, IOException, CustomException {
-		
+			String accessToken, String body) throws IOException, IOException,
+			CustomException {
+
 		URL url;
 		HttpsURLConnection connection = null;
 		url = new URL(baseURL + Constants.REST_URL + queryStr);
 		connection = (HttpsURLConnection) url.openConnection();
-		connection.setRequestProperty("Authorization", "OAuth " +
-		 accessToken);
+		connection.setRequestProperty("Authorization", "OAuth " + accessToken);
 		setRequestMethodUsingWorkaround(connection, "PATCH");
-		connection.setRequestProperty("Content-Type","application/json");
+		connection.setRequestProperty("Content-Type", "application/json");
 		connection.setUseCaches(false);
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 		OutputStream os = connection.getOutputStream();
-		os.write(body.getBytes());
-		
+		os.write(body.getBytes("UTF-8"));
 		os.flush();
 		os.close();
-		
+
 		InputStream is = connection.getInputStream();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 		String line;
@@ -364,24 +345,29 @@ public class Utility {
 			response.append('\r');
 		}
 		rd.close();
-		//return response.toString();
-		if(connection.getResponseCode() != 204){
+		// return response.toString();
+		if (connection.getResponseCode() != 204) {
+			System.out.println("responce code  " + connection.getResponseCode()
+					+ "  " + connection.getResponseMessage() + " Message :"
+					+ response.toString());
 			throw new CustomException("Error while update knowledge article Id");
+
+		} else {
+			System.out.println("record Inserted successfully!!!!");
+			System.out.println("responce code  " + connection.getResponseCode()
+					+ "  " + connection.getResponseMessage() + " Message :"
+					+ response.toString());
 		}
 
-		System.out.println("responce code  " + connection.getResponseCode()
-				+ "  " + connection.getResponseMessage()+" Message :"+response.toString());
-
 	}
-	
+
 	private static final void setRequestMethodUsingWorkaround(
 			final HttpURLConnection httpURLConnection, final String method) {
 		try {
 			httpURLConnection.setRequestMethod(method);
 			// Check whether we are running on a buggy JRE
 		} catch (final ProtocolException pe) {
-			Class<?> connectionClass = httpURLConnection
-					.getClass();
+			Class<?> connectionClass = httpURLConnection.getClass();
 			java.lang.reflect.Field delegateField = null;
 			try {
 				delegateField = connectionClass.getDeclaredField("delegate");
