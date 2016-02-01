@@ -52,7 +52,7 @@ public class Utility {
 				.setConsumerKey("3MVG9ZL0ppGP5UrBR.600kPJSKldTpds6SxCgEgj44lSgMJAcU9C5etNsi9y5GusxXFEuSKd3m3oylBiXdNtR");
 		loginDetailBean.setConsumerSecret("5127982414795005574");
 		loginDetailBean.setUrl("https://ap2.salesforce.com");
-		loginDetailBean.setQueueName("00G28000001Ep0TEAS");
+		loginDetailBean.setQueueId("00G28000001Ep0TEAS");
 		return loginDetailBean;
 	}
 
@@ -286,7 +286,7 @@ public class Utility {
 
 		url = new URL(Constants.POST_LOGIN_URL);
 		connection = (HttpsURLConnection) url.openConnection();
-		connection.setRequestProperty("accept", "application/xml");
+		connection.setRequestProperty("accept", "application/json");
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Content-Length",
 				"" + Integer.toString(urlParameters.getBytes().length));
@@ -402,28 +402,28 @@ public class Utility {
 		}
 	}
 
-	public static String getSessionId(String loingResponse) {
-		java.io.InputStream sbis = new java.io.StringBufferInputStream(
-				loingResponse.toString());
-		javax.xml.parsers.DocumentBuilderFactory b = javax.xml.parsers.DocumentBuilderFactory
-				.newInstance();
-		b.setNamespaceAware(false);
-		org.w3c.dom.Document doc = null;
-		javax.xml.parsers.DocumentBuilder db = null;
-		try {
-			db = b.newDocumentBuilder();
-			doc = db.parse(sbis);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		org.w3c.dom.Element element = doc.getDocumentElement();
-		String access_token = "";
-		NodeList nodeList = element.getElementsByTagName("access_token");
-		if (nodeList != null && nodeList.getLength() > 0) {
-			Element myElement = (Element) nodeList.item(0);
-			access_token = myElement.getFirstChild().getNodeValue();
-		}
-		return access_token;
-	}
+//	public static String getSessionId(String loingResponse) {
+//		java.io.InputStream sbis = new java.io.StringBufferInputStream(
+//				loingResponse.toString());
+//		javax.xml.parsers.DocumentBuilderFactory b = javax.xml.parsers.DocumentBuilderFactory
+//				.newInstance();
+//		b.setNamespaceAware(false);
+//		org.w3c.dom.Document doc = null;
+//		javax.xml.parsers.DocumentBuilder db = null;
+//		try {
+//			db = b.newDocumentBuilder();
+//			doc = db.parse(sbis);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		org.w3c.dom.Element element = doc.getDocumentElement();
+//		String access_token = "";
+//		NodeList nodeList = element.getElementsByTagName("access_token");
+//		if (nodeList != null && nodeList.getLength() > 0) {
+//			Element myElement = (Element) nodeList.item(0);
+//			access_token = myElement.getFirstChild().getNodeValue();
+//		}
+//		return access_token;
+//	}
 
 }

@@ -65,14 +65,14 @@ public class SFUtility {
 	 * 
 	 * @throws CustomException
 	 */
-	public static String getAccessTokenFromSF() throws JSONException,
+	public static String getAccessTokenFromSF(SFConnectionConfig sfConnectionConfig) throws JSONException,
 			IOException, CustomException {
 
-		SFConnectionConfig loginDetailBean = Utility
-				.getLoginDetailsFromMiddleware();
-		String loingResponse = Utility.getHttpPostResponce(loginDetailBean);
-		String accessToken = Utility.getSessionId(loingResponse);
-		System.out.println("json    " + accessToken);
+//		SFConnectionConfig loginDetailBean = Utility
+//				.getLoginDetailsFromMiddleware();
+		String loingResponse = Utility.getHttpPostResponce(sfConnectionConfig);
+		String accessToken = new JSONObject(loingResponse).getString("access_token");//Utility.getSessionId(loingResponse);
+		System.out.println("Access Token [" + accessToken + "]");
 		return accessToken;
 	}
 
