@@ -381,9 +381,15 @@ public class SFUtility {
 		typeList.add("Long Text Area");
 		typeList.add("textarea");
 		typeList.add("Rich Text Area");
+		Set<String> nameList = new HashSet<String>();
+		nameList.add("Summary");
+		nameList.add("Title");
+		
 		for (int i = 0; i < jsonArray.length(); i++) {
 			String typeStr = jsonArray.getJSONObject(i).getString("type");
-			if (typeList.contains(typeStr)) {
+			if ((typeList.contains(typeStr) && jsonArray
+					.getJSONObject(i).getString("name").endsWith("__c"))||((typeList.contains(typeStr)&& nameList.contains(jsonArray
+						.getJSONObject(i).getString("name")) ) )) {
 				articleFields.add( new SFArticleField(jsonArray
 						.getJSONObject(i).getString("name"), jsonArray
 						.getJSONObject(i).getString("label"), jsonArray
