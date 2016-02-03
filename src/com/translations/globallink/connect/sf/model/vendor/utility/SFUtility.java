@@ -18,6 +18,7 @@ import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleType;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFLocale;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFQueue;
+import com.translations.globallink.connect.sf.model.vendor.dto.SFUser;
 import com.translations.globallink.connect.sf.model.vendor.exception.CustomException;
 
 /**
@@ -312,6 +313,8 @@ public class SFUtility {
 				
 		JSONObject queueIdListJSON = new JSONObject((response));
 		JSONArray jsonObjArray = queueIdListJSON.getJSONArray("records");
+		if(jsonObjArray.length()==0)
+			return new ArrayList<SFQueue>();
 		for (int i = 0; i < jsonObjArray.length(); i++) {
 			SFQueue sfQueue = new SFQueue();
 			sfQueue.setQueueId(jsonObjArray.getJSONObject(i).getString("Id"));
@@ -332,6 +335,8 @@ public class SFUtility {
 		JSONObject json = new JSONObject(response);
 		JSONArray jsonArray = json.getJSONArray("fields").getJSONObject(3)
 				.getJSONArray("picklistValues");
+		if(jsonArray.length()==0)
+			return new ArrayList<SFLocale>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			SFLocale lang = new SFLocale();
 			lang.setCode(jsonArray.getJSONObject(i).getString("value"));
@@ -376,6 +381,8 @@ public class SFUtility {
 				accessToken);
 		JSONObject json = new JSONObject(response);
 		JSONArray jsonArray = json.getJSONArray("fields");
+		if(jsonArray.length()==0)
+			return new ArrayList<SFArticleField>();
 		Set<String> typeList = new HashSet<String>();
 		typeList.add("string");
 		typeList.add("Long Text Area");
@@ -387,17 +394,50 @@ public class SFUtility {
 		
 		for (int i = 0; i < jsonArray.length(); i++) {
 			String typeStr = jsonArray.getJSONObject(i).getString("type");
-			if ((typeList.contains(typeStr) && jsonArray
-					.getJSONObject(i).getString("name").endsWith("__c"))||((typeList.contains(typeStr)&& nameList.contains(jsonArray
-						.getJSONObject(i).getString("name")) ) )) {
-				articleFields.add( new SFArticleField(jsonArray
-						.getJSONObject(i).getString("name"), jsonArray
-						.getJSONObject(i).getString("label"), jsonArray
-						.getJSONObject(i).getString("type"), jsonArray
-						.getJSONObject(i).getInt("length"), true) );
+			if ((typeList.contains(typeStr) && jsonArray.getJSONObject(i)
+					.getString("name").endsWith("__c"))
+					|| (nameList.contains(jsonArray.getJSONObject(i).getString(
+							"name")))) {
+				articleFields.add(new SFArticleField(jsonArray.getJSONObject(i)
+						.getString("name"), jsonArray.getJSONObject(i)
+						.getString("label"), jsonArray.getJSONObject(i)
+						.getString("type"), jsonArray.getJSONObject(i).getInt(
+						"length"), true));
 			}
 		}
 		return articleFields;
+
+	}
+
+	public static void insertAssignedId(SFArticle sourceArticle,String userId,String accessToken, String baseURL)
+			throws IOException, Exception {
+		String queryStr = "knowledgeManagement/articleVersions/translations/"+sourceArticle.getId();
+
+		String body = "{\"assigneeId\":\""+userId+"\"}";
+
+		Utility.getHttpPatchResponce(baseURL, queryStr, accessToken, body);
+	}
+	
+	public static List<SFUser> getUserInfo(String accessToken, String baseURL)
+			throws IOException, CustomException, JSONException {
+		List<SFUser> userList = new ArrayList<SFUser>();
+		String queryStr = "query?q=SELECT+Id+,+Name+FROM+User+WHERE+UserPermissionsKnowledgeUser+=+true";
+		String response = Utility.getHttpGetResponce(baseURL, queryStr,
+				accessToken);
+
+		JSONObject kaListJSON = new JSONObject((response));
+		JSONArray jsonArray = kaListJSON.getJSONArray("records");
+		if (jsonArray.length() == 0) {
+			return new ArrayList<SFUser>();
+		}
+		for (int i = 0; i < jsonArray.length(); i++) {
+			SFUser user = new SFUser();
+			user.setUserId(jsonArray.getJSONObject(i).getString("Id"));
+			user.setUserName(jsonArray.getJSONObject(i).getString("Name"));
+			userList.add(user);
+
+		}
+		return userList;
 
 	}
 }

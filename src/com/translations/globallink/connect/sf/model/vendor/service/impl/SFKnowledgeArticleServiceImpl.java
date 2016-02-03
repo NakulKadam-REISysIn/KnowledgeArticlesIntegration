@@ -99,15 +99,18 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
 	}
     }
 
-    @Override
-    public void setAssignee(SFArticle sourceArticle, String userId) throws Exception {
-	// TODO Auto-generated method stub
+	public void setAssignee(SFArticle sourceArticle, String userId)
+			throws Exception {
+		SFUtility.insertAssignedId(sourceArticle, userId,
+				SFUtility.getAccessTokenFromSF(this.connectionConfig),
+				this.connectionConfig.getUrl());
 	
     }
 
-    @Override
     public List<SFUser> getUsers() throws Exception {
-	// TODO Auto-generated method stub
-	return null;
+		return SFUtility.getUserInfo(SFUtility.getAccessTokenFromSF(this.connectionConfig),
+				this.connectionConfig.getUrl());
+		
+		
     }
 }

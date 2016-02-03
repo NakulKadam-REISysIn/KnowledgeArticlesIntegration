@@ -12,6 +12,7 @@ import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleType;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFLocale;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFQueue;
+import com.translations.globallink.connect.sf.model.vendor.dto.SFUser;
 import com.translations.globallink.connect.sf.model.vendor.service.SFKnowledgeArticleService;
 import com.translations.globallink.connect.sf.model.vendor.service.impl.SFKnowledgeArticleServiceImpl;
 
@@ -33,12 +34,40 @@ public class StubClass {
 		// callgetReadyArticleIdsForTranslation();//after translation
 		// callgetArticleStreamForTranslation();// before transaltion
 		// callimportTranslatedArticle();
-		 callgetSFQueues();
+		// callgetSFQueues();
 		// callgetSFLocales();
 		// callgettype();
 		// callgetFieldsForArticleType();
 		//calltestConnection();
+		//callsetAssignee();
+		callgetUsers();
 
+
+	}
+
+	public static void callgetUsers() throws Exception {
+		SFConnectionConfig sfConnectionConfig = Utility
+				.getLoginDetailsFromMiddleware();
+		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
+				sfConnectionConfig);
+		List<SFUser> users= sfKnowledgeArticleImpl.getUsers();
+		for(SFUser user:users)
+		{
+			System.out.println("Id  "+ user.getUserId()+"Name  "+user.getUserName());
+		}
+		
+	}
+
+	
+	public static void callsetAssignee() throws Exception {
+		SFConnectionConfig sfConnectionConfig = Utility
+				.getLoginDetailsFromMiddleware();
+		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
+				sfConnectionConfig);
+		SFArticle sfarticle= new SFArticle();
+		sfarticle.setId("ka0280000005WYQAA2");
+		
+		sfKnowledgeArticleImpl.setAssignee(sfarticle, "00528000001d2Ui");
 	}
 
 	public static void calltestConnection() throws Exception {
