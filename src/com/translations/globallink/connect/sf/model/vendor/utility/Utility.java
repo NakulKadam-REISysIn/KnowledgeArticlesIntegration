@@ -151,11 +151,13 @@ public class Utility {
 							sfArticle.getType(), true));
 		}
 		for (SFArticleField sfArticle : customFields) {
+		    if(!jsonObject.isNull(sfArticle.getName())) {
 			content.getFields().add(
 					new Field(jsonObject.getString(sfArticle.getName()),
 							sfArticle.getName(), sfArticle.getLabel(),
 							sfArticle.isTransalate(), sfArticle.getLength(),
 							sfArticle.getType(), false));
+		}
 		}
 		InputStream inputStream = new ByteArrayInputStream(
 				new GloballinkContentXMLUtil()
