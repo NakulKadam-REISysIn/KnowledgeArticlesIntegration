@@ -9,6 +9,7 @@ import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleType;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFLocale;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFQueue;
+import com.translations.globallink.connect.sf.model.vendor.dto.SFUser;
 
 public interface SFKnowledgeArticleService {
 
@@ -86,4 +87,16 @@ public interface SFKnowledgeArticleService {
 	 */
 	public boolean testConnection(SFConnectionConfig config) throws Exception;
 
+	/**
+	 * @param sourceArticle Source Knowledge Article
+	 * @param userId User Id
+	 * @throws Exception
+	 */
+	public void setAssignee(SFArticle sourceArticle, String userId) throws Exception;
+
+	/**
+	 * @return List of SF Users
+	 * @throws Exception
+	 */
+	public List<SFUser> getUsers() throws Exception;
 }

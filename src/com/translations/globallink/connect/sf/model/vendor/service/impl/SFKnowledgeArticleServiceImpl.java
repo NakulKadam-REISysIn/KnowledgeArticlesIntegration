@@ -9,6 +9,7 @@ import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleType;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFLocale;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFQueue;
+import com.translations.globallink.connect.sf.model.vendor.dto.SFUser;
 import com.translations.globallink.connect.sf.model.vendor.service.SFKnowledgeArticleService;
 import com.translations.globallink.connect.sf.model.vendor.utility.SFUtility;
 
@@ -96,5 +97,17 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
 	} catch (Exception ex) {
 	    throw ex;
 	}
+    }
+
+    @Override
+    public void setAssignee(SFArticle sourceArticle, String userId) throws Exception {
+	// TODO Auto-generated method stub
+	
+    }
+
+    @Override
+    public List<SFUser> getUsers() throws Exception {
+	// TODO Auto-generated method stub
+	return null;
     }
 }
