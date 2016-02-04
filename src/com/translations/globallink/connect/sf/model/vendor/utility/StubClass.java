@@ -153,8 +153,9 @@ public class StubClass {
 				.getLoginDetailsFromMiddleware();
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
+		String queueId = "00G28000000U3LoEAK";
 		List<SFArticle> ReadyArticleIdsForTranslation = sfKnowledgeArticleImpl
-				.getReadyArticleIdsForTranslation("fr", "offer");
+				.getReadyArticleIdsForTranslation("fr", "Demo_Article__kav", queueId);
 		for (SFArticle sfArticle : ReadyArticleIdsForTranslation) {
 			System.out.println("ArticleId:" + sfArticle.getId()
 					+ "==========MasterVersion Id:"
@@ -171,8 +172,9 @@ public class StubClass {
 				.getLoginDetailsFromMiddleware();
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
+		String queueId = "00G28000000U3LoEAK";
 		List<SFArticle> ReadyArticleIdsForTranslation = sfKnowledgeArticleImpl
-				.getReadyArticleIdsForTranslation("fr", "offer");
+				.getReadyArticleIdsForTranslation("fr", "Demo_Article__kav", queueId);
 		SFArticle sfArticle = new SFArticle();
 		for (SFArticle sfArticleObj : ReadyArticleIdsForTranslation) {
 			System.out.println(sfArticleObj.getId()
@@ -181,7 +183,7 @@ public class StubClass {
 			sfArticle = sfArticleObj;
 		}
 
-		sfArticle.setType("offer");
+		sfArticle.setType("Demo_Article__kav");
 		sfArticle.setLanguage("fr");
 
 		List<SFArticleField> fieldsInfo = Utility.getSFArticleCustomFieldList();

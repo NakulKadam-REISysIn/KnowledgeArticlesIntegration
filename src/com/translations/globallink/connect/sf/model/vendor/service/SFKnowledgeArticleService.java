@@ -18,13 +18,15 @@ public interface SFKnowledgeArticleService {
 	 *            Target SF locale code
 	 * @param articleType
 	 *            Type of SF article
+	 * @param sfQueueId
+	 *            SF Queue Id
 	 * @return List of SFArticle populated with source Knowledge Article Ids and
 	 *         Article Types that are ready for translation for provided
 	 *         targetSFLocale code.
 	 * @throws Exception
 	 */
 	public List<SFArticle> getReadyArticleIdsForTranslation(
-			String targetSFLocale, String articleType) throws Exception;
+			String targetSFLocale, String articleType, String sfQueueId) throws Exception;
 
 	/**
 	 * @param sourceArticle

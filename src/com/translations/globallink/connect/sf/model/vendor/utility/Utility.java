@@ -11,11 +11,24 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import com.translations.globallink.connect.sf.model.vendor.constants.Constants;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticle;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleField;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
@@ -23,20 +36,6 @@ import com.translations.globallink.connect.sf.model.vendor.exception.CustomExcep
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.Content;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.Field;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.GloballinkContentXMLUtil;
-import com.translations.globallink.connect.sf.model.vendor.constants.Constants;
-
-import java.util.ArrayList;
-import javax.net.ssl.HttpsURLConnection;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 public class Utility {
 	/**
@@ -52,7 +51,7 @@ public class Utility {
 				.setConsumerKey("3MVG9ZL0ppGP5UrBR.600kPJSKldTpds6SxCgEgj44lSgMJAcU9C5etNsi9y5GusxXFEuSKd3m3oylBiXdNtR");
 		loginDetailBean.setConsumerSecret("5127982414795005574");
 		loginDetailBean.setUrl("https://ap2.salesforce.com");
-		loginDetailBean.setQueueId("00G28000001Ep0TEAS");
+		//loginDetailBean.setQueueId("00G28000000U3LoEAK");
 		return loginDetailBean;
 	}
 
@@ -187,9 +186,9 @@ public class Utility {
 	 */
 	public static List<SFArticleField> getSFArticleCustomFieldList() {
 		List<SFArticleField> fields = new ArrayList<SFArticleField>();
-		fields.add(new SFArticleField("Name__c", "name", "Text", 256, true));
-		fields.add(new SFArticleField("Summary", "Summary", "Text", 1026, true));
 		fields.add(new SFArticleField("Title", "Title", "Text", 256, true));
+		fields.add(new SFArticleField("Summary", "Summary", "Text", 1026, true));
+		fields.add(new SFArticleField("Body__c", "Body", "Rich Text Area", 32768, true));
 		return fields;
 
 	}
@@ -268,8 +267,20 @@ public class Utility {
 				response.append('\r');
 			}
 			rd.close();
+			System.out.println(response.toString());
 			return response.toString();
 		} else {
+		    System.out.println(connection.getResponseCode() + " -- " + connection.getResponseMessage());
+		    InputStream is = connection.getErrorStream();
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			String line;
+			StringBuffer response = new StringBuffer();
+			while ((line = rd.readLine()) != null) {
+				response.append(line);
+				response.append('\r');
+			}
+			rd.close();
+			System.out.println(response.toString());
 			throw new CustomException(
 					"Issue while fetching targetObjectInstance Found:");
 		}

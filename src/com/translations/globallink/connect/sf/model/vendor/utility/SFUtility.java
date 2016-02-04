@@ -216,7 +216,7 @@ public class SFUtility {
 				.generateInCluaseString(targetobjectInstanceIdList);
 		String queryStr = "query?q=SELECT+Id+,+KnowledgeArticleId+,+Title+,+Summary+,+OwnerId+,+MasterVersionId+,+Language+FROM+"
 				+ articleType
-				+ "__kav+WHERE+language+=+'"
+				+ "+WHERE+language+=+'"
 				+ locale
 				+ "'+AND+PublishStatus+=+'draft'+AND+Id+IN+("
 				+ targetObjectIdStr + ")";
@@ -265,7 +265,7 @@ public class SFUtility {
 
 		String queryStr = "query?q=select+" + Utility.getFieldsStr(fields)
 				+ "+,+" + Utility.getFieldsStr(metadataFields) + "+from+"
-				+ sourceArticle.getType() + "__kav+where+Id+in+('"
+				+ sourceArticle.getType() + "+where+Id+in+('"
 				+ sourceArticle.getMasterVersionId() + "')";
 		System.out.println("last query==" + queryStr);
 		String response = Utility.getHttpGetResponce(baseURL, queryStr,
@@ -294,7 +294,7 @@ public class SFUtility {
 	public static void insertArticleIntoSF(SFArticle sourceArticle,
 			InputStream stream, String accessToken, String baseURL)
 			throws Exception {
-		String queryStr = "sobjects/" + sourceArticle.getType() + "__kav" + "/"
+		String queryStr = "sobjects/" + sourceArticle.getType() + "" + "/"
 				+ sourceArticle.getId();
 		JSONObject json = Utility.conevertStreamToJSON(stream);
 		String body = json.toString();

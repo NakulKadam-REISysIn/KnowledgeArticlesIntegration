@@ -7,16 +7,14 @@ public class SFConnectionConfig {
     private String consumerSecret;
     private String url;
     private String user;
-    private String queueId;
 
-    public SFConnectionConfig(String password, String consumerKey, String consumerSecret, String url, String user, String queueId) {
+    public SFConnectionConfig(String password, String consumerKey, String consumerSecret, String url, String user) {
 	super();
 	this.password = password;
 	this.consumerKey = consumerKey;
 	this.consumerSecret = consumerSecret;
 	this.url = url;
 	this.user = user;
-	this.queueId = queueId;
     }
 
     public SFConnectionConfig() {
@@ -82,21 +80,6 @@ public class SFConnectionConfig {
      */
     public void setConsumerSecret(String consumerSecret) {
 	this.consumerSecret = consumerSecret;
-    }
-
-    /**
-     * @return the queueId
-     */
-    public String getQueueId() {
-	return queueId;
-    }
-
-    /**
-     * @param queueId
-     *            the queueId to set
-     */
-    public void setQueueId(String queueId) {
-	this.queueId = queueId;
     }
 
 }
