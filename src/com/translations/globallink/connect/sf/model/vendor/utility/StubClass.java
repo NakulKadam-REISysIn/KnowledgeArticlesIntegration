@@ -31,10 +31,10 @@ public class StubClass {
 	 */
 
 	public static void main(String[] args) throws Exception {
-		// callgetReadyArticleIdsForTranslation();//after translation
+		//callgetReadyArticleIdsForTranslation();//after translation
 		//callgetArticleStreamForTranslation();// before transaltion
 		 //callimportTranslatedArticle();
-		 callgetSFQueues();
+		 //callgetSFQueues();
 		 //callgetSFLocales();
 		// callgettype();
 		// callgetFieldsForArticleType();
@@ -65,7 +65,7 @@ public class StubClass {
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
 		SFArticle sfarticle= new SFArticle();
-		sfarticle.setId("ka0280000005WYQAA2");
+		sfarticle.setId("ka0280000005XFKAA2");
 		
 		sfKnowledgeArticleImpl.setAssignee(sfarticle, "00528000001d2Ui");
 	}

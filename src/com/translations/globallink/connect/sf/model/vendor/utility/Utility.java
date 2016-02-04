@@ -14,11 +14,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.DOMException;
@@ -43,6 +46,7 @@ public class Utility {
 	 * 
 	 * @return loginDetailBean it rerun SFConnectionConfig data
 	 */
+	private static Logger logger = Logger.getLogger(Utility.class);
 	public static SFConnectionConfig getLoginDetailsFromMiddleware() {
 		SFConnectionConfig loginDetailBean = new SFConnectionConfig();
 		loginDetailBean.setUser("Nakul@ka.dev");
@@ -186,9 +190,9 @@ public class Utility {
 	 */
 	public static List<SFArticleField> getSFArticleCustomFieldList() {
 		List<SFArticleField> fields = new ArrayList<SFArticleField>();
-		fields.add(new SFArticleField("Title", "Title", "Text", 256, true));
+		fields.add(new SFArticleField("Name__c", "name", "Text", 256, true));
 		fields.add(new SFArticleField("Summary", "Summary", "Text", 1026, true));
-		fields.add(new SFArticleField("Body__c", "Body", "Rich Text Area", 32768, true));
+		fields.add(new SFArticleField("Title", "Title", "Text", 256, true));
 		return fields;
 
 	}
