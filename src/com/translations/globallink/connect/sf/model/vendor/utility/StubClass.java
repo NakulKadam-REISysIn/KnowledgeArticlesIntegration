@@ -32,16 +32,16 @@ public class StubClass {
 
 	public static void main(String[] args) throws Exception {
 		// callgetReadyArticleIdsForTranslation();//after translation
-		// callgetArticleStreamForTranslation();// before transaltion
-		// callimportTranslatedArticle();
-		// callgetSFQueues();
-		// callgetSFLocales();
+		//callgetArticleStreamForTranslation();// before transaltion
+		 //callimportTranslatedArticle();
+		 callgetSFQueues();
+		 //callgetSFLocales();
 		// callgettype();
 		// callgetFieldsForArticleType();
 		//calltestConnection();
 		//callsetAssignee();
-		callgetUsers();
-
+		//callgetUsers();
+		
 
 	}
 
@@ -153,9 +153,12 @@ public class StubClass {
 				.getLoginDetailsFromMiddleware();
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
-		String queueId = "00G28000000U3LoEAK";
 		List<SFArticle> ReadyArticleIdsForTranslation = sfKnowledgeArticleImpl
-				.getReadyArticleIdsForTranslation("fr", "Demo_Article__kav", queueId);
+				.getReadyArticleIdsForTranslation("fr", "offer__kav","00G28000001Ep0TEAS",false);
+		if(ReadyArticleIdsForTranslation.size()==0)
+		{
+			System.out.println("No records to display");
+		}
 		for (SFArticle sfArticle : ReadyArticleIdsForTranslation) {
 			System.out.println("ArticleId:" + sfArticle.getId()
 					+ "==========MasterVersion Id:"
@@ -172,9 +175,8 @@ public class StubClass {
 				.getLoginDetailsFromMiddleware();
 		SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(
 				sfConnectionConfig);
-		String queueId = "00G28000000U3LoEAK";
 		List<SFArticle> ReadyArticleIdsForTranslation = sfKnowledgeArticleImpl
-				.getReadyArticleIdsForTranslation("fr", "Demo_Article__kav", queueId);
+				.getReadyArticleIdsForTranslation("fr", "offer__kav","00G28000001Ep0TEAS",true);
 		SFArticle sfArticle = new SFArticle();
 		for (SFArticle sfArticleObj : ReadyArticleIdsForTranslation) {
 			System.out.println(sfArticleObj.getId()
@@ -183,7 +185,7 @@ public class StubClass {
 			sfArticle = sfArticleObj;
 		}
 
-		sfArticle.setType("Demo_Article__kav");
+		sfArticle.setType("offer__kav");
 		sfArticle.setLanguage("fr");
 
 		List<SFArticleField> fieldsInfo = Utility.getSFArticleCustomFieldList();
@@ -192,6 +194,7 @@ public class StubClass {
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				ArticleStreamTransaltion));
 		String read;
+		
 
 		while ((read = br.readLine()) != null) {
 			System.out.println(read);

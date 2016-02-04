@@ -26,7 +26,7 @@ public interface SFKnowledgeArticleService {
 	 * @throws Exception
 	 */
 	public List<SFArticle> getReadyArticleIdsForTranslation(
-			String targetSFLocale, String articleType, String sfQueueId) throws Exception;
+			String targetSFLocale, String articleType, String sfQueueId, Boolean includeDraft) throws Exception;
 
 	/**
 	 * @param sourceArticle

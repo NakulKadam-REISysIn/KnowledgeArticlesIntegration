@@ -238,25 +238,122 @@ public class Utility {
 	 * @throws CustomException
 	 */
 	public static String getHttpGetResponce(String baseURL, String queryStr,
-			String accessToken) throws IOException, CustomException {
+			String accessToken) throws CustomException, IOException {
 		URL url;
 		HttpsURLConnection connection = null;
+		StringBuffer response = new StringBuffer();
+		try {
+			url = new URL(baseURL + "/" + Constants.REST_URL + queryStr);
+			connection = (HttpsURLConnection) url.openConnection();
+			connection.setRequestProperty("Authorization", "OAuth "
+					+ accessToken);
+			connection.setRequestProperty("accept", Constants.ACCEPT_STRING);
+			connection.setRequestMethod("GET");
 
-		url = new URL(baseURL + "/" + Constants.REST_URL + queryStr);
-		connection = (HttpsURLConnection) url.openConnection();
-		connection.setRequestProperty("Authorization", "OAuth " + accessToken);
-		connection.setRequestProperty("accept", Constants.ACCEPT_STRING);
-		connection.setRequestMethod("GET");
+			connection.setRequestProperty("Content-Type",
+					Constants.CONTENT_TYPE_VAL);
+			connection.setRequestProperty("Content-Language", "en-US");
+			connection.setUseCaches(false);
+			connection.setDoInput(true);
+			connection.setDoOutput(true);
 
-		connection.setRequestProperty("Content-Type",
-				Constants.CONTENT_TYPE_VAL);
-		connection.setRequestProperty("Content-Language", "en-US");
-		connection.setUseCaches(false);
-		connection.setDoInput(true);
-		connection.setDoOutput(true);
+			if (connection.getResponseCode() == Constants.SUCCESS_CODE) {
+				System.out.println("responcecode"
+						+ connection.getResponseCode());
 
-		if (connection.getResponseCode() == Constants.SUCCESS_CODE) {
-			System.out.println("responcecode" + connection.getResponseCode());
+				InputStream is = connection.getInputStream();
+				BufferedReader rd = new BufferedReader(
+						new InputStreamReader(is));
+				String line;
+
+				while ((line = rd.readLine()) != null) {
+					response.append(line);
+					response.append('\r');
+				}
+				rd.close();
+				
+				// return response.toString();
+			} else {
+				throw new CustomException("Error in callout. Error code:"
+						+ connection.getResponseCode() + " Error message:"+ connection.getResponseMessage());
+			}
+		} catch (IOException ex) {
+			logger.error(ex.getMessage(), ex);
+			throw ex;
+
+		}
+		return response.toString();
+	}
+
+	public static String getHttpPostResponce(SFConnectionConfig loginDetailBean)
+			throws IOException, CustomException {
+		URL url;
+		HttpsURLConnection connection = null;
+		StringBuffer response = new StringBuffer();
+		String urlParameters = "grant_type=password&client_id="
+				+ loginDetailBean.getConsumerKey() + "&client_secret="
+				+ loginDetailBean.getConsumerSecret() + "&username="
+				+ loginDetailBean.getUser() + "&password="
+				+ loginDetailBean.getPassword();
+		try {
+			url = new URL(Constants.POST_LOGIN_URL);
+			connection = (HttpsURLConnection) url.openConnection();
+			connection.setRequestProperty("accept", "application/json");
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Content-Length",
+					"" + Integer.toString(urlParameters.getBytes().length));
+			connection.setRequestProperty("Content-Type",
+					Constants.CONTENT_TYPE_VAL);
+			connection.setRequestProperty("Content-Language", "en-US");
+			connection.setUseCaches(false);
+			connection.setDoInput(true);
+			connection.setDoOutput(true);
+			OutputStream os = connection.getOutputStream();
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+					os, "UTF-8"));
+			writer.write(urlParameters);
+			writer.flush();
+			writer.close();
+			os.close();
+
+			InputStream is = connection.getInputStream();
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			String line;
+			while ((line = rd.readLine()) != null) {
+				response.append(line);
+				response.append('\r');
+			}
+			rd.close();
+		} catch (IOException ex) {
+			logger.error(ex.getMessage(), ex);
+			throw ex;
+		}
+
+		return response.toString();
+
+	}
+
+	public static void getHttpPatchResponce(String baseURL, String queryStr,
+			String accessToken, String body) throws IOException,
+			CustomException {
+
+		URL url;
+		HttpsURLConnection connection = null;
+		try {
+			url = new URL(baseURL + Constants.REST_URL + queryStr);
+			System.out.println("patch link" + url);
+			connection = (HttpsURLConnection) url.openConnection();
+			connection.setRequestProperty("Authorization", "OAuth "
+					+ accessToken);
+			setRequestMethodUsingWorkaround(connection, "PATCH");
+			connection.setRequestProperty("Content-Type", "application/json");
+			connection.setUseCaches(false);
+			connection.setDoInput(true);
+			connection.setDoOutput(true);
+			OutputStream os = connection.getOutputStream();
+			os.write(body.getBytes("UTF-8"));
+			os.flush();
+			os.close();
 
 			InputStream is = connection.getInputStream();
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
@@ -267,109 +364,25 @@ public class Utility {
 				response.append('\r');
 			}
 			rd.close();
-			System.out.println(response.toString());
-			return response.toString();
-		} else {
-		    System.out.println(connection.getResponseCode() + " -- " + connection.getResponseMessage());
-		    InputStream is = connection.getErrorStream();
-			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-			String line;
-			StringBuffer response = new StringBuffer();
-			while ((line = rd.readLine()) != null) {
-				response.append(line);
-				response.append('\r');
+			// return response.toString();
+			if (connection.getResponseCode() != 204) {
+				System.out.println("responce code  "
+						+ connection.getResponseCode() + "  "
+						+ connection.getResponseMessage() + " Message :"
+						+ response.toString());
+				throw new CustomException("HTTP PATCH Responce Error"
+						+ connection.getResponseCode());
+
+			} else {
+				System.out.println("record Inserted successfully!!!!");
+				System.out.println("responce code  "
+						+ connection.getResponseCode() + "  "
+						+ connection.getResponseMessage() + " Message :"
+						+ response.toString());
 			}
-			rd.close();
-			System.out.println(response.toString());
-			throw new CustomException(
-					"Issue while fetching targetObjectInstance Found:");
-		}
-
-	}
-
-	public static String getHttpPostResponce(SFConnectionConfig loginDetailBean)
-			throws IOException {
-		URL url;
-		HttpsURLConnection connection = null;
-		String urlParameters = "grant_type=password&client_id="
-				+ loginDetailBean.getConsumerKey() + "&client_secret="
-				+ loginDetailBean.getConsumerSecret() + "&username="
-				+ loginDetailBean.getUser() + "&password="
-				+ loginDetailBean.getPassword();
-
-		url = new URL(Constants.POST_LOGIN_URL);
-		connection = (HttpsURLConnection) url.openConnection();
-		connection.setRequestProperty("accept", "application/json");
-		connection.setRequestMethod("POST");
-		connection.setRequestProperty("Content-Length",
-				"" + Integer.toString(urlParameters.getBytes().length));
-		connection.setRequestProperty("Content-Type",
-				Constants.CONTENT_TYPE_VAL);
-		connection.setRequestProperty("Content-Language", "en-US");
-		connection.setUseCaches(false);
-		connection.setDoInput(true);
-		connection.setDoOutput(true);
-		OutputStream os = connection.getOutputStream();
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,
-				"UTF-8"));
-		writer.write(urlParameters);
-		writer.flush();
-		writer.close();
-		os.close();
-
-		InputStream is = connection.getInputStream();
-		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-		String line;
-		StringBuffer response = new StringBuffer();
-		while ((line = rd.readLine()) != null) {
-			response.append(line);
-			response.append('\r');
-		}
-		rd.close();
-		return response.toString();
-
-	}
-
-	public static void getHttpPatchResponce(String baseURL, String queryStr,
-			String accessToken, String body) throws IOException, IOException,
-			CustomException {
-
-		URL url;
-		HttpsURLConnection connection = null;
-		url = new URL(baseURL + Constants.REST_URL + queryStr);
-		connection = (HttpsURLConnection) url.openConnection();
-		connection.setRequestProperty("Authorization", "OAuth " + accessToken);
-		setRequestMethodUsingWorkaround(connection, "PATCH");
-		connection.setRequestProperty("Content-Type", "application/json");
-		connection.setUseCaches(false);
-		connection.setDoInput(true);
-		connection.setDoOutput(true);
-		OutputStream os = connection.getOutputStream();
-		os.write(body.getBytes("UTF-8"));
-		os.flush();
-		os.close();
-
-		InputStream is = connection.getInputStream();
-		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-		String line;
-		StringBuffer response = new StringBuffer();
-		while ((line = rd.readLine()) != null) {
-			response.append(line);
-			response.append('\r');
-		}
-		rd.close();
-		// return response.toString();
-		if (connection.getResponseCode() != 204) {
-			System.out.println("responce code  " + connection.getResponseCode()
-					+ "  " + connection.getResponseMessage() + " Message :"
-					+ response.toString());
-			throw new CustomException("Error while update knowledge article Id");
-
-		} else {
-			System.out.println("record Inserted successfully!!!!");
-			System.out.println("responce code  " + connection.getResponseCode()
-					+ "  " + connection.getResponseMessage() + " Message :"
-					+ response.toString());
+		} catch (IOException ex) {
+			logger.error(ex.getMessage(), ex);
+			throw ex;
 		}
 
 	}
@@ -414,29 +427,5 @@ public class Utility {
 			}
 		}
 	}
-
-//	public static String getSessionId(String loingResponse) {
-//		java.io.InputStream sbis = new java.io.StringBufferInputStream(
-//				loingResponse.toString());
-//		javax.xml.parsers.DocumentBuilderFactory b = javax.xml.parsers.DocumentBuilderFactory
-//				.newInstance();
-//		b.setNamespaceAware(false);
-//		org.w3c.dom.Document doc = null;
-//		javax.xml.parsers.DocumentBuilder db = null;
-//		try {
-//			db = b.newDocumentBuilder();
-//			doc = db.parse(sbis);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		org.w3c.dom.Element element = doc.getDocumentElement();
-//		String access_token = "";
-//		NodeList nodeList = element.getElementsByTagName("access_token");
-//		if (nodeList != null && nodeList.getLength() > 0) {
-//			Element myElement = (Element) nodeList.item(0);
-//			access_token = myElement.getFirstChild().getNodeValue();
-//		}
-//		return access_token;
-//	}
 
 }

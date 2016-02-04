@@ -72,7 +72,7 @@ public class SFUtility {
 //		SFConnectionConfig loginDetailBean = Utility
 //				.getLoginDetailsFromMiddleware();
 		String loingResponse = Utility.getHttpPostResponce(sfConnectionConfig);
-		String accessToken = new JSONObject(loingResponse).getString("access_token");//Utility.getSessionId(loingResponse);
+		String accessToken = new JSONObject(loingResponse).getString("access_token");
 		System.out.println("Access Token [" + accessToken + "]");
 		return accessToken;
 	}
@@ -207,36 +207,47 @@ public class SFUtility {
 
 	public static List<SFArticle> getKnowLedgeArticlesTranslatedVersions(
 			List<String> targetobjectInstanceIdList, String articleType,
-			String accessToken, String baseURL, String locale) throws Exception {
+			String accessToken, String baseURL, String locale, Boolean includeDraft) throws Exception {
 		if (targetobjectInstanceIdList.size() == 0) {
 			return new ArrayList<SFArticle>();
 		}
+		List<String> statusList = new ArrayList<String>();
+		if (includeDraft) {
+			statusList.add("Draft");
+			statusList.add("Online");
+		} else {
+			statusList.add("Online");
+		}
 		List<SFArticle> sfArticleList = new ArrayList<SFArticle>();
-		String targetObjectIdStr = Utility
-				.generateInCluaseString(targetobjectInstanceIdList);
-		String queryStr = "query?q=SELECT+Id+,+KnowledgeArticleId+,+Title+,+Summary+,+OwnerId+,+MasterVersionId+,+Language+FROM+"
+		for (String status : statusList) {
+			String targetObjectIdStr = Utility
+					.generateInCluaseString(targetobjectInstanceIdList);
+			String queryStr = new String();
+			queryStr = "query?q=SELECT+Id+,+KnowledgeArticleId+,+Title+,+Summary+,+OwnerId+,+MasterVersionId+,+Language+FROM+"
 				+ articleType
 				+ "+WHERE+language+=+'"
 				+ locale
-				+ "'+AND+PublishStatus+=+'draft'+AND+Id+IN+("
-				+ targetObjectIdStr + ")";
-		System.out.println("query " + queryStr);
-		String response = Utility.getHttpGetResponce(baseURL, queryStr,
-				accessToken);
+					+ "'+AND+MasterVersion.PublishStatus+=+'"
+					+ status
+					+ "'+AND+Id+IN+(" + targetObjectIdStr + ")";
+			System.out.println("query " + queryStr);
+			String response = Utility.getHttpGetResponce(baseURL, queryStr,
+					accessToken);
 
-		JSONObject kaListJSON = new JSONObject((response));
+			JSONObject kaListJSON = new JSONObject((response));
 
-		JSONArray jsonArray = kaListJSON.getJSONArray("records");
-		for (int i = 0; i < jsonArray.length(); i++) {
-			SFArticle sfArticle = new SFArticle();
-			JSONObject jsonObj = jsonArray.getJSONObject(i);
-			sfArticle.setId(jsonObj.getString("Id"));
-			sfArticle.setLanguage(locale);
-			sfArticle.setMasterVersionId(jsonObj.getString("MasterVersionId"));
-			sfArticle.setType(articleType);
-			sfArticleList.add(sfArticle);
+			JSONArray jsonArray = kaListJSON.getJSONArray("records");
+			for (int i = 0; i < jsonArray.length(); i++) {
+				SFArticle sfArticle = new SFArticle();
+				JSONObject jsonObj = jsonArray.getJSONObject(i);
+				sfArticle.setId(jsonObj.getString("Id"));
+				sfArticle.setLanguage(locale);
+				sfArticle.setMasterVersionId(jsonObj
+						.getString("MasterVersionId"));
+				sfArticle.setType(articleType);
+				sfArticleList.add(sfArticle);
+			}
 		}
-
 		return sfArticleList;
 	}
 

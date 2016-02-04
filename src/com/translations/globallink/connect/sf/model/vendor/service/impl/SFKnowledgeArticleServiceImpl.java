@@ -29,14 +29,14 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
      *            Knowledge Article Type inString Format
      * @exception Exception
      */
-    public List<SFArticle> getReadyArticleIdsForTranslation(String targetSFLocale, String articleType, String sfQueueId) throws Exception {
+    public List<SFArticle> getReadyArticleIdsForTranslation(String targetSFLocale, String articleType, String sfQueueId, Boolean includeDraft) throws Exception {
 
 	String accessToken = SFUtility.getAccessTokenFromSF(this.connectionConfig);
 	//String queueId = SFUtility.getQueueId(connectionConfig.getQueueName(),
 	//	accessToken, connectionConfig.getUrl());
 	List<String> processInstanceIdList = SFUtility.getProcessInstanceIds(sfQueueId, accessToken, connectionConfig.getUrl());
 	List<String> targetInstaceIdList = SFUtility.getTargetobjectInstanceIds(processInstanceIdList, accessToken, connectionConfig.getUrl());
-	List<SFArticle> sfArticleList = SFUtility.getKnowLedgeArticlesTranslatedVersions(targetInstaceIdList, articleType, accessToken, connectionConfig.getUrl(), targetSFLocale);
+	List<SFArticle> sfArticleList = SFUtility.getKnowLedgeArticlesTranslatedVersions(targetInstaceIdList, articleType, accessToken, connectionConfig.getUrl(), targetSFLocale, includeDraft);
 	return sfArticleList;
     }
 
