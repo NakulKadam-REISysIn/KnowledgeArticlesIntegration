@@ -67,26 +67,4 @@ public class GloballinkContentXMLUtil {
 		return bytes;
 	}
 	
-	public static void main(String[] args) {
-		
-		Content content = new Content("SF", "offer", "Test1", "123QWE");
-		Field cField = new Field("Test title", "123QWE", "title", true, 256, "text", false);
-		content.getFields().add(cField);
-		cField = new Field("Test Description", "123QWE", "description", true, 0, "textarea", false);
-		content.getFields().add(cField);
-		cField = new Field("vaibhav", "123QWE", "submitter", false, 0, "text", true);
-		content.getFields().add(cField);
-		cField = new Field("pankaj", "123QWE", "submitter", false, 0, "text", true);
-		content.getFields().add(cField);
-		GloballinkContentXMLUtil util = new GloballinkContentXMLUtil();
-		
-		try {
-			
-			System.out.println(new String(util.getContentBytesForStream(content)));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 }
