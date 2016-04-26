@@ -98,10 +98,40 @@ public class Utility {
      * @return In clause string
      */
     public static String getFieldsStr(List<SFArticleField> fields) {
+	boolean isTitleIncluded = false;
+	for (SFArticleField str : fields) {
+	    if (str.getName().equalsIgnoreCase("Title")) {
+		isTitleIncluded = true;
+	    }
+	}
+
+	if (!isTitleIncluded) {
+	    SFArticleField field = new SFArticleField("Title", "Title", "string", 255, false);
+	    fields.add(field);
+	}
+
 	String fieldsStr = "";
 	for (SFArticleField str : fields) {
 	    fieldsStr += str.getName() + "+,+";
 	}
+
+	return fieldsStr.substring(0, fieldsStr.length() - 3);
+    }
+
+    /**
+     * Generate In clause for Metadata SFArticleField.
+     * 
+     * @param fields
+     *            List of Metadata SFArticleField data type.
+     * @return In clause string
+     */
+    public static String getMetaDataFieldsStr(List<SFArticleField> fields) {
+
+	String fieldsStr = "";
+	for (SFArticleField str : fields) {
+	    fieldsStr += str.getName() + "+,+";
+	}
+
 	return fieldsStr.substring(0, fieldsStr.length() - 3);
     }
 
@@ -132,14 +162,25 @@ public class Utility {
 
 	content.getFields().add(new Field(sourceArticle.getLanguage(), "Language", "Language", false, 18, "Text", true));
 
-	for (SFArticleField sfArticle : metadataField) {
-	    content.getFields().add(new Field(jsonObject.getString(sfArticle.getName()), sfArticle.getName(), sfArticle.getLabel(), sfArticle.isTransalate(), sfArticle.getLength(), sfArticle.getType(), true));
+	for (SFArticleField sfArticleField : metadataField) {
+	    content.getFields().add(new Field(jsonObject.getString(sfArticleField.getName()), sfArticleField.getName(), sfArticleField.getLabel(), sfArticleField.isTransalate(), sfArticleField.getLength(), sfArticleField.getType(), true));
 	}
-	for (SFArticleField sfArticle : customFields) {
-	    if (!jsonObject.isNull(sfArticle.getName())) {
-		content.getFields().add(new Field(jsonObject.getString(sfArticle.getName()), sfArticle.getName(), sfArticle.getLabel(), sfArticle.isTransalate(), sfArticle.getLength(), sfArticle.getType(), false));
+
+	boolean titlePresent = false;
+
+	for (SFArticleField sfArticleField : customFields) {
+	    if (!jsonObject.isNull(sfArticleField.getName())) {
+		if (sfArticleField.getName().equalsIgnoreCase("Title")) {
+		    titlePresent = true;
+		}
+		content.getFields().add(new Field(jsonObject.getString(sfArticleField.getName()), sfArticleField.getName(), sfArticleField.getLabel(), sfArticleField.isTransalate(), sfArticleField.getLength(), sfArticleField.getType(), false));
 	    }
 	}
+
+	if (!titlePresent) {
+	    content.getFields().add(new Field(jsonObject.getString("Title"), "Title", "Title", false, 255, "string", false));
+	}
+
 	InputStream inputStream = new ByteArrayInputStream(new GloballinkContentXMLUtil().getContentBytesForStream(content));
 	return inputStream;
     }
@@ -255,13 +296,13 @@ public class Utility {
 	return response.toString();
     }
 
-    public static String getHttpPostResponce(SFConnectionConfig loginDetailBean) throws IOException, CustomException {
+    public static String getHttpPostResponce(SFConnectionConfig loginDetailBean) throws Exception {
 	URL url;
 	HttpsURLConnection connection = null;
 	StringBuffer response = new StringBuffer();
 	String urlParameters = "grant_type=password&client_id=" + loginDetailBean.getConsumerKey() + "&client_secret=" + loginDetailBean.getConsumerSecret() + "&username=" + loginDetailBean.getUser() + "&password=" + loginDetailBean.getPassword();
 	try {
-	    url = new URL(Constants.POST_LOGIN_URL);
+	    url = new URL(loginDetailBean.getUrl() + Constants.AUTH_URL);
 	    logger.info("HTTP POST URL - " + url);
 	    logger.trace(urlParameters);
 	    connection = (HttpsURLConnection) url.openConnection();
@@ -290,7 +331,7 @@ public class Utility {
 	    rd.close();
 	} catch (IOException ex) {
 	    logger.error(ex.getMessage(), ex);
-	    throw ex;
+	    throw new Exception("Please enter valid SalesForce Configuartion Values.");
 	}
 
 	return response.toString();

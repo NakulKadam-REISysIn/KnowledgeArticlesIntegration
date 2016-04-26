@@ -50,16 +50,11 @@ public class SFUtility {
 
     /**
      * @return accessToken return accesstoken String after login into salesforce.
+     * @throws Exception 
      * 
      * @throws ClientProtocolException
-     * 
-     * @throws IOException
-     * 
-     * @throws JSONException
-     * 
-     * @throws CustomException
      */
-    public static String getAccessTokenFromSF(SFConnectionConfig sfConnectionConfig) throws JSONException, IOException, CustomException {
+    public static String getAccessTokenFromSF(SFConnectionConfig sfConnectionConfig) throws Exception {
 
 	//		SFConnectionConfig loginDetailBean = Utility
 	//				.getLoginDetailsFromMiddleware();
@@ -236,7 +231,7 @@ public class SFUtility {
 	// todo - Add metadata fields hardcoded
 	List<SFArticleField> metadataFields = Utility.getSFArticleMetadataFieldList();
 
-	String queryStr = "query?q=select+" + Utility.getFieldsStr(fields) + "+,+" + Utility.getFieldsStr(metadataFields) + "+from+" + sourceArticle.getType() + "+where+Id+in+('" + sourceArticle.getMasterVersionId() + "')";
+	String queryStr = "query?q=select+" + Utility.getFieldsStr(fields) + "+,+" + Utility.getMetaDataFieldsStr(metadataFields) + "+from+" + sourceArticle.getType() + "+where+Id+in+('" + sourceArticle.getMasterVersionId() + "')";
 	logger.debug("last query==" + queryStr);
 	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
 
