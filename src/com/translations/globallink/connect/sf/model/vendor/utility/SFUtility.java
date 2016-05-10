@@ -2,9 +2,14 @@ package com.translations.globallink.connect.sf.model.vendor.utility;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -205,11 +210,25 @@ public class SFUtility {
 		sfArticle.setLanguage(locale);
 		sfArticle.setMasterVersionId(jsonObj.getString("MasterVersionId"));
 		sfArticle.setType(articleType);
+			sfArticle.setDueDate(getDueDate(sfArticle.getId(), accessToken, baseURL));
 		sfArticleList.add(sfArticle);
 	    }
 	}
 	return sfArticleList;
     }
+
+	private static Date getDueDate(String sourceArticleId, String accessToken, String baseURL)
+			throws IOException, CustomException, JSONException, ParseException {
+		String DueDateQueryStr = "knowledgeManagement/articleVersions/translations/" + sourceArticleId;
+		String DueDateResponce = Utility.getHttpGetResponce(baseURL, DueDateQueryStr, accessToken);
+		JSONObject KAListjson = new JSONObject((DueDateResponce));
+		String DueDate = KAListjson.getString("dueDate");
+		DateFormat format = new SimpleDateFormat("yyyy-MM-DD", Locale.ENGLISH);
+		Date date = format.parse(DueDate);
+		System.out.println("DUE DATE " + date);
+		return date;
+
+	}
 
     /**
      * 

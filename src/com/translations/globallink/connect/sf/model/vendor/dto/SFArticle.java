@@ -1,11 +1,15 @@
 package com.translations.globallink.connect.sf.model.vendor.dto;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class SFArticle {
 
     private String id;
     private String masterVersionId;
     private String type;
     private String language;
+    private Date dueDate;
 
     public String getId() {
 	return id;
@@ -50,4 +54,13 @@ public class SFArticle {
 	public void setLanguage(String language) {
 		this.language = language;
 	}
+
+	public Date getDueDate() {
+		return dueDate;
+	}
+
+	public void setDueDate(Date dueDate) {
+		this.dueDate = dueDate;
+	}
+
 }
