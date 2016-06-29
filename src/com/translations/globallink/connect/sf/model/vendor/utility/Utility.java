@@ -1,25 +1,15 @@
 package com.translations.globallink.connect.sf.model.vendor.utility;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.DOMException;
@@ -29,33 +19,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.translations.globallink.connect.sf.model.vendor.constants.Constants;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticle;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticleField;
-import com.translations.globallink.connect.sf.model.vendor.dto.SFConnectionConfig;
-import com.translations.globallink.connect.sf.model.vendor.exception.CustomException;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.Content;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.Field;
 import com.translations.globallink.connect.sf.model.vendor.utility.xml.GloballinkContentXMLUtil;
 
 public class Utility {
-    /**
-     * This method will be used to get data from middleWare.
-     * 
-     * @return loginDetailBean it rerun SFConnectionConfig data
-     */
-    private static Logger logger = Logger.getLogger(Utility.class);
-
-    public static SFConnectionConfig getLoginDetailsFromMiddleware() {
-	SFConnectionConfig loginDetailBean = new SFConnectionConfig();
-	loginDetailBean.setUser("Nakul@ka.dev");
-	loginDetailBean.setPassword("test@123ELikr4MyfI1xfgtYZdCyxeTnv");
-	loginDetailBean.setConsumerKey("3MVG9ZL0ppGP5UrBR.600kPJSKldTpds6SxCgEgj44lSgMJAcU9C5etNsi9y5GusxXFEuSKd3m3oylBiXdNtR");
-	loginDetailBean.setConsumerSecret("5127982414795005574");
-	loginDetailBean.setUrl("https://ap2.salesforce.com");
-	//loginDetailBean.setQueueId("00G28000000U3LoEAK");
-	return loginDetailBean;
-    }
 
     /**
      * Generate In clause for Ids.
@@ -65,7 +35,7 @@ public class Utility {
      * @return In clause string
      * 
      */
-    public static String generateInCluaseString(List<String> strList) {
+    public static String generateInClauseString(List<String> strList) {
 	String returnStr = "";
 	for (String str : strList) {
 	    returnStr += "'" + str + "',";
@@ -80,7 +50,7 @@ public class Utility {
      *            It is List of SFArticle data type.
      * @return In clause string.
      */
-    public static String generateInCluaseStringForSFArticle(List<SFArticle> sfarticle) {
+    public static String generateInClauseStringForSFArticle(List<SFArticle> sfarticle) {
 	String masterVersionIdStr = "";
 
 	for (SFArticle masterVersionIds : sfarticle) {
@@ -187,26 +157,9 @@ public class Utility {
 
     public static List<SFArticleField> getSFArticleMetadataFieldList() {
 	List<SFArticleField> fields = new ArrayList<SFArticleField>();
-	// fields.add(new SFArticleField("Id", "Id", "Id", 36, false));
 	fields.add(new SFArticleField("KnowledgeArticleId", "KnowledgeArticleId", "Id", 20, false));
 	fields.add(new SFArticleField("CreatedById", "CreatedById", "Id", 20, false));
 	fields.add(new SFArticleField("MasterVersionId", "MasterVersionId", "Id", 20, false));
-
-	return fields;
-
-    }
-
-    // Dummy code
-    /**
-     * hard code data insertion in the SFArticleField-custum fileds
-     * 
-     * @return
-     */
-    public static List<SFArticleField> getSFArticleCustomFieldList() {
-	List<SFArticleField> fields = new ArrayList<SFArticleField>();
-	fields.add(new SFArticleField("Name__c", "name", "Text", 256, true));
-	fields.add(new SFArticleField("Summary", "Summary", "Text", 1026, true));
-	fields.add(new SFArticleField("Title", "Title", "Text", 256, true));
 	return fields;
 
     }
@@ -238,187 +191,6 @@ public class Utility {
 	    }
 	}
 	return article;
-    }
-
-    /**
-     * 
-     * @param baseURL
-     *            crate Httpget method
-     * @param queryStr
-     *            query that pass in url
-     * @param accessToken
-     *            to add header using sdUtility
-     * @return
-     * @throws ClientProtocolException
-     * @throws IOException
-     * @throws CustomException
-     */
-    public static String getHttpGetResponce(String baseURL, String queryStr, String accessToken) throws CustomException, IOException {
-	URL url;
-	HttpsURLConnection connection = null;
-	StringBuffer response = new StringBuffer();
-	try {
-	    url = new URL(baseURL + "/" + Constants.REST_URL + queryStr);
-	    logger.info("HTTP GET URL - " + url);
-	    connection = (HttpsURLConnection) url.openConnection();
-	    connection.setRequestProperty("Authorization", "OAuth " + accessToken);
-	    connection.setRequestProperty("accept", Constants.ACCEPT_STRING);
-	    connection.setRequestMethod("GET");
-
-	    connection.setRequestProperty("Content-Type", Constants.CONTENT_TYPE_VAL);
-	    connection.setRequestProperty("Content-Language", "en-US");
-	    connection.setUseCaches(false);
-	    connection.setDoInput(true);
-	    connection.setDoOutput(true);
-
-	    if (connection.getResponseCode() == Constants.SUCCESS_CODE) {
-		logger.info("RESPONSE CODE - " + connection.getResponseCode());
-
-		InputStream is = connection.getInputStream();
-		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-		String line;
-
-		while ((line = rd.readLine()) != null) {
-		    response.append(line);
-		    response.append('\r');
-		}
-		rd.close();
-
-		// return response.toString();
-	    } else {
-		throw new CustomException("Error in callout. Error code:" + connection.getResponseCode() + " Error message:" + connection.getResponseMessage());
-	    }
-	} catch (IOException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw ex;
-
-	}
-	return response.toString();
-    }
-
-    public static String getHttpPostResponce(SFConnectionConfig loginDetailBean) throws Exception {
-	URL url;
-	HttpsURLConnection connection = null;
-	StringBuffer response = new StringBuffer();
-	String urlParameters = "grant_type=password&client_id=" + loginDetailBean.getConsumerKey() + "&client_secret=" + loginDetailBean.getConsumerSecret() + "&username=" + loginDetailBean.getUser() + "&password=" + loginDetailBean.getPassword();
-	try {
-	    url = new URL(loginDetailBean.getUrl() + Constants.AUTH_URL);
-	    logger.info("HTTP POST URL - " + url);
-	    logger.trace(urlParameters);
-	    connection = (HttpsURLConnection) url.openConnection();
-	    connection.setRequestProperty("accept", "application/json");
-	    connection.setRequestMethod("POST");
-	    connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
-	    connection.setRequestProperty("Content-Type", Constants.CONTENT_TYPE_VAL);
-	    connection.setRequestProperty("Content-Language", "en-US");
-	    connection.setUseCaches(false);
-	    connection.setDoInput(true);
-	    connection.setDoOutput(true);
-	    OutputStream os = connection.getOutputStream();
-	    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-	    writer.write(urlParameters);
-	    writer.flush();
-	    writer.close();
-	    os.close();
-
-	    InputStream is = connection.getInputStream();
-	    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-	    String line;
-	    while ((line = rd.readLine()) != null) {
-		response.append(line);
-		response.append('\r');
-	    }
-	    rd.close();
-	} catch (IOException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new Exception("Please enter valid SalesForce Configuartion Values.");
-	}
-
-	return response.toString();
-
-    }
-
-    public static void getHttpPatchResponce(String baseURL, String queryStr, String accessToken, String body) throws IOException, CustomException {
-
-	URL url;
-	HttpsURLConnection connection = null;
-	try {
-	    url = new URL(baseURL + Constants.REST_URL + queryStr);
-	    logger.info("HTTP PATCH URL - " + url);
-	    logger.trace(body);
-	    connection = (HttpsURLConnection) url.openConnection();
-	    connection.setRequestProperty("Authorization", "OAuth " + accessToken);
-	    setRequestMethodUsingWorkaround(connection, "PATCH");
-	    connection.setRequestProperty("Content-Type", "application/json");
-	    connection.setUseCaches(false);
-	    connection.setDoInput(true);
-	    connection.setDoOutput(true);
-	    OutputStream os = connection.getOutputStream();
-	    os.write(body.getBytes("UTF-8"));
-	    os.flush();
-	    os.close();
-
-	    InputStream is = connection.getInputStream();
-	    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-	    String line;
-	    StringBuffer response = new StringBuffer();
-	    while ((line = rd.readLine()) != null) {
-		response.append(line);
-		response.append('\r');
-	    }
-	    rd.close();
-	    // return response.toString();
-	    if (connection.getResponseCode() != 204) {
-		logger.error("responce code  " + connection.getResponseCode() + "  " + connection.getResponseMessage() + " Message :" + response.toString());
-		throw new CustomException("HTTP PATCH Responce Error" + connection.getResponseCode());
-
-	    } else {
-		logger.debug("record Inserted successfully!!!!");
-		logger.debug("responce code  " + connection.getResponseCode() + "  " + connection.getResponseMessage() + " Message :" + response.toString());
-	    }
-	} catch (IOException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw ex;
-	}
-
-    }
-
-    private static final void setRequestMethodUsingWorkaround(final HttpURLConnection httpURLConnection, final String method) {
-	try {
-	    httpURLConnection.setRequestMethod(method);
-	    // Check whether we are running on a buggy JRE
-	} catch (final ProtocolException pe) {
-	    Class<?> connectionClass = httpURLConnection.getClass();
-	    java.lang.reflect.Field delegateField = null;
-	    try {
-		delegateField = connectionClass.getDeclaredField("delegate");
-		delegateField.setAccessible(true);
-		HttpURLConnection delegateConnection = (HttpURLConnection) delegateField.get(httpURLConnection);
-		setRequestMethodUsingWorkaround(delegateConnection, method);
-	    } catch (NoSuchFieldException e) {
-		// Ignore for now, keep going
-	    } catch (IllegalArgumentException e) {
-		throw new RuntimeException(e);
-	    } catch (IllegalAccessException e) {
-		throw new RuntimeException(e);
-	    }
-	    try {
-		java.lang.reflect.Field methodField;
-		while (connectionClass != null) {
-		    try {
-			methodField = connectionClass.getDeclaredField("method");
-		    } catch (NoSuchFieldException e) {
-			connectionClass = connectionClass.getSuperclass();
-			continue;
-		    }
-		    methodField.setAccessible(true);
-		    methodField.set(httpURLConnection, method);
-		    break;
-		}
-	    } catch (final Exception e) {
-		throw new RuntimeException(e);
-	    }
-	}
     }
 
 }

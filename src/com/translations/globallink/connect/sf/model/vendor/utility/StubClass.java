@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.translations.globallink.connect.sf.model.vendor.dto.SFArticle;
@@ -30,21 +31,47 @@ public class StubClass {
      */
 
     public static void main(String[] args) throws Exception {
-//	callgetReadyArticleIdsForTranslation();//after translation
-//	callgetArticleStreamForTranslation();// before transaltion
-//	callimportTranslatedArticle();
-//	callgetSFQueues();
-//	callgetSFLocales();
-//	callgettype();
-//	callgetFieldsForArticleType();
-//	calltestConnection();
-//	callsetAssignee();
-//	callgetUsers();
+	//	callgetReadyArticleIdsForTranslation();//after translation
+	//	callgetArticleStreamForTranslation();// before transaltion
+	//	callimportTranslatedArticle();
+	//	callgetSFQueues();
+	//	callgetSFLocales();
+	//	callgettype();
+	//	callgetFieldsForArticleType();
+	//	calltestConnection();
+	//	callsetAssignee();
+	//	callgetUsers();
+
+    }
+
+    public static SFConnectionConfig getLoginDetailsFromMiddleware() {
+	SFConnectionConfig loginDetailBean = new SFConnectionConfig();
+	loginDetailBean.setUser("Nakul@ka.dev");
+	loginDetailBean.setPassword("test@123ELikr4MyfI1xfgtYZdCyxeTnv");
+	loginDetailBean.setConsumerKey("3MVG9ZL0ppGP5UrBR.600kPJSKldTpds6SxCgEgj44lSgMJAcU9C5etNsi9y5GusxXFEuSKd3m3oylBiXdNtR");
+	loginDetailBean.setConsumerSecret("5127982414795005574");
+	loginDetailBean.setUrl("https://ap2.salesforce.com");
+	//loginDetailBean.setQueueId("00G28000000U3LoEAK");
+	return loginDetailBean;
+    }
+
+    // Dummy code
+    /**
+     * hard code data insertion in the SFArticleField-custum fileds
+     * 
+     * @return
+     */
+    public static List<SFArticleField> getSFArticleCustomFieldList() {
+	List<SFArticleField> fields = new ArrayList<SFArticleField>();
+	fields.add(new SFArticleField("Name__c", "name", "Text", 256, true));
+	fields.add(new SFArticleField("Summary", "Summary", "Text", 1026, true));
+	fields.add(new SFArticleField("Title", "Title", "Text", 256, true));
+	return fields;
 
     }
 
     public static void callgetUsers() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	List<SFUser> users = sfKnowledgeArticleImpl.getUsers();
 	for (SFUser user : users) {
@@ -54,7 +81,7 @@ public class StubClass {
     }
 
     public static void callsetAssignee() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	SFArticle sfarticle = new SFArticle();
 	sfarticle.setId("ka0280000005XFKAA2");
@@ -63,7 +90,7 @@ public class StubClass {
     }
 
     public static void calltestConnection() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	boolean testconnection = sfKnowledgeArticleImpl.testConnection(sfConnectionConfig);
 	if (testconnection) {
@@ -75,7 +102,7 @@ public class StubClass {
     }
 
     public static void callgetFieldsForArticleType() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	List<SFArticleField> sfTypefields = sfKnowledgeArticleImpl.getFieldsForArticleType("offer__kav");
 	for (SFArticleField sfarticle : sfTypefields) {
@@ -88,7 +115,7 @@ public class StubClass {
     }
 
     public static void callgettype() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	List<SFArticleType> sfTypes = sfKnowledgeArticleImpl.getArticleTypes();
 	for (SFArticleType sfArticle : sfTypes) {
@@ -103,7 +130,7 @@ public class StubClass {
     }
 
     public static void callgetSFLocales() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	List<SFLocale> lang = sfKnowledgeArticleImpl.getSFLocales();
 	for (SFLocale locale : lang) {
@@ -113,7 +140,7 @@ public class StubClass {
     }
 
     public static void callgetSFQueues() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	List<SFQueue> sfqueue = sfKnowledgeArticleImpl.getSFQueues();
 	for (SFQueue sfArticle : sfqueue) {
@@ -123,7 +150,7 @@ public class StubClass {
     }
 
     public static void callgetReadyArticleIdsForTranslation() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	List<SFArticle> ReadyArticleIdsForTranslation = sfKnowledgeArticleImpl.getReadyArticleIdsForTranslation("fr", "offer__kav", "00G28000001Ep0TEAS", false);
 	if (ReadyArticleIdsForTranslation.size() == 0) {
@@ -137,7 +164,7 @@ public class StubClass {
     }
 
     public static void callgetArticleStreamForTranslation() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	List<SFArticle> ReadyArticleIdsForTranslation = sfKnowledgeArticleImpl.getReadyArticleIdsForTranslation("fr", "offer__kav", "00G28000001Ep0TEAS", true);
 	SFArticle sfArticle = new SFArticle();
@@ -149,7 +176,7 @@ public class StubClass {
 	sfArticle.setType("offer__kav");
 	sfArticle.setLanguage("fr");
 
-	List<SFArticleField> fieldsInfo = Utility.getSFArticleCustomFieldList();
+	List<SFArticleField> fieldsInfo = getSFArticleCustomFieldList();
 	InputStream ArticleStreamTransaltion = sfKnowledgeArticleImpl.getArticleStreamForTranslation(sfArticle, fieldsInfo);
 	BufferedReader br = new BufferedReader(new InputStreamReader(ArticleStreamTransaltion));
 	String read;
@@ -161,7 +188,7 @@ public class StubClass {
     }
 
     public static void callimportTranslatedArticle() throws Exception {
-	SFConnectionConfig sfConnectionConfig = Utility.getLoginDetailsFromMiddleware();
+	SFConnectionConfig sfConnectionConfig = getLoginDetailsFromMiddleware();
 	SFKnowledgeArticleService sfKnowledgeArticleImpl = new SFKnowledgeArticleServiceImpl(sfConnectionConfig);
 	SFArticle sfArticle = new SFArticle();
 	sfArticle.setId("ka028000000I5JZAA0");

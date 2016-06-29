@@ -11,7 +11,7 @@ import com.translations.globallink.connect.sf.model.vendor.dto.SFLocale;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFQueue;
 import com.translations.globallink.connect.sf.model.vendor.dto.SFUser;
 import com.translations.globallink.connect.sf.model.vendor.service.SFKnowledgeArticleService;
-import com.translations.globallink.connect.sf.model.vendor.utility.SFUtility;
+import com.translations.globallink.connect.sf.model.vendor.utility.SalesForceService;
 
 public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService {
 
@@ -30,13 +30,10 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
      * @exception Exception
      */
     public List<SFArticle> getReadyArticleIdsForTranslation(String targetSFLocale, String articleType, String sfQueueId, Boolean includeDraft) throws Exception {
-
-	String accessToken = SFUtility.getAccessTokenFromSF(this.connectionConfig);
-	//String queueId = SFUtility.getQueueId(connectionConfig.getQueueName(),
-	//	accessToken, connectionConfig.getUrl());
-	List<String> processInstanceIdList = SFUtility.getProcessInstanceIds(sfQueueId, accessToken, connectionConfig.getUrl());
-	List<String> targetInstaceIdList = SFUtility.getTargetobjectInstanceIds(processInstanceIdList, accessToken, connectionConfig.getUrl());
-	List<SFArticle> sfArticleList = SFUtility.getKnowLedgeArticlesTranslatedVersions(targetInstaceIdList, articleType, accessToken, connectionConfig.getUrl(), targetSFLocale, includeDraft);
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	List<String> processInstanceIdList = sfService.getProcessInstanceIds(sfQueueId);
+	List<String> targetInstaceIdList = sfService.getTargetobjectInstanceIds(processInstanceIdList);
+	List<SFArticle> sfArticleList = sfService.getKnowLedgeArticlesTranslatedVersions(targetInstaceIdList, articleType, targetSFLocale, includeDraft);
 	return sfArticleList;
     }
 
@@ -48,8 +45,8 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
      * @exception Exception
      */
     public InputStream getArticleStreamForTranslation(SFArticle sourceArticle, List<SFArticleField> fields) throws Exception {
-	String accessToken = SFUtility.getAccessTokenFromSF(this.connectionConfig);
-	return SFUtility.getKnowLedgeArticlesRecords(sourceArticle, fields, accessToken, connectionConfig.getUrl());
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	return sfService.getKnowLedgeArticlesRecords(sourceArticle, fields);
     }
 
     /**
@@ -67,50 +64,43 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
      * 
      */
     public void importTranslatedArticle(SFArticle sourceArticle, String targetSFLocale, InputStream stream) throws Exception {
-	String accessToken = SFUtility.getAccessTokenFromSF(this.connectionConfig);
-	SFUtility.insertArticleIntoSF(sourceArticle, stream, accessToken, this.connectionConfig.getUrl());
-
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	sfService.insertArticleIntoSF(sourceArticle, stream);
     }
 
     // Phase II implementation
     public List<SFArticleType> getArticleTypes() throws Exception {
-	return SFUtility.gettype(SFUtility.getAccessTokenFromSF(this.connectionConfig), this.connectionConfig.getUrl());
-
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	return sfService.gettype();
     }
 
     public List<SFArticleField> getFieldsForArticleType(String articleTypeName) throws Exception {
-	return SFUtility.FieldsForArticleType(articleTypeName, SFUtility.getAccessTokenFromSF(this.connectionConfig), this.connectionConfig.getUrl());
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	return sfService.FieldsForArticleType(articleTypeName);
     }
 
     public List<SFLocale> getSFLocales() throws Exception {
-	return SFUtility.getlocales(SFUtility.getAccessTokenFromSF(this.connectionConfig), this.connectionConfig.getUrl());
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	return sfService.getlocales();
     }
 
     public List<SFQueue> getSFQueues() throws Exception {
-	return SFUtility.SFQueueList(SFUtility.getAccessTokenFromSF(this.connectionConfig), this.connectionConfig.getUrl());
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	return sfService.SFQueueList();
     }
 
     public boolean testConnection(SFConnectionConfig config) throws Exception {
-	try {
-	    SFUtility.getAccessTokenFromSF(config);
-	    return true;
-	} catch (Exception ex) {
-	    throw ex;
-	}
+	SalesForceService sfService = new SalesForceService(config);
+	return sfService.testConnection();
     }
 
-	public void setAssignee(SFArticle sourceArticle, String userId)
-			throws Exception {
-		SFUtility.insertAssignedId(sourceArticle, userId,
-				SFUtility.getAccessTokenFromSF(this.connectionConfig),
-				this.connectionConfig.getUrl());
-	
+    public void setAssignee(SFArticle sourceArticle, String userId) throws Exception {
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	sfService.insertAssignedId(sourceArticle, userId);
     }
 
     public List<SFUser> getUsers() throws Exception {
-		return SFUtility.getUserInfo(SFUtility.getAccessTokenFromSF(this.connectionConfig),
-				this.connectionConfig.getUrl());
-		
-		
+	SalesForceService sfService = new SalesForceService(this.connectionConfig);
+	return sfService.getUserInfo();
     }
 }

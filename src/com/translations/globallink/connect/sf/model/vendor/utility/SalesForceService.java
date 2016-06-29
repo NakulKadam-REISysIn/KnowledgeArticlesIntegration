@@ -1,9 +1,16 @@
 package com.translations.globallink.connect.sf.model.vendor.utility;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,9 +19,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import javax.net.ssl.HttpsURLConnection;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.translations.globallink.connect.sf.model.vendor.constants.Constants;
@@ -28,7 +37,7 @@ import com.translations.globallink.connect.sf.model.vendor.dto.SFUser;
 import com.translations.globallink.connect.sf.model.vendor.exception.CustomException;
 
 /**
- * @class Name-SalesforceUtility
+ * @class Name-SalesForceService
  * 
  *        This class use for the fetching data from SFConnectionConfig class and then login into salesforce and then get QueueId,processInstance,TargetObjectId,KnowledgeArticle also insert the article into Salesforce.
  * 
@@ -37,34 +46,31 @@ import com.translations.globallink.connect.sf.model.vendor.exception.CustomExcep
  * @createdDate-
  */
 
-public class SFUtility {
-    
-    private static Logger logger = Logger.getLogger(SFUtility.class);
-    
+public class SalesForceService {
+
+    private static Logger logger = Logger.getLogger(SalesForceService.class);
+
+    private SFConnectionConfig sfConnectionConfig;
+
+    public SalesForceService(SFConnectionConfig sfConnectionConfig) {
+	this.sfConnectionConfig = sfConnectionConfig;
+    }
+
     /**
-     * 
-     * @param loginDetailbean
-     *            it is SFConnectionConfig variable that contains values to get value from SFConnectionConfig class
-     * 
      * @return StringBuffer generated data from SFConnectionConfig is get return.
      */
 
-    public static String generateheaderString(SFConnectionConfig loginDetailBean) {
-	return new StringBuffer("grant_type=password").append("&username=").append(loginDetailBean.getUser()).append("&password=").append(loginDetailBean.getPassword()).append("&client_id=").append(loginDetailBean.getConsumerKey()).append("&client_secret=").append(loginDetailBean.getConsumerSecret()).toString();
+    public String generateheaderString() {
+	return new StringBuffer("grant_type=password").append("&username=").append(this.sfConnectionConfig.getUser()).append("&password=").append(this.sfConnectionConfig.getPassword()).append("&client_id=").append(this.sfConnectionConfig.getConsumerKey()).append("&client_secret=").append(this.sfConnectionConfig.getConsumerSecret()).toString();
     }
 
     /**
      * @return accessToken return accesstoken String after login into salesforce.
-     * @throws Exception 
-     * 
-     * @throws ClientProtocolException
+     * @throws Exception
      */
-    public static String getAccessTokenFromSF(SFConnectionConfig sfConnectionConfig) throws Exception {
-
-	//		SFConnectionConfig loginDetailBean = Utility
-	//				.getLoginDetailsFromMiddleware();
-	String loingResponse = Utility.getHttpPostResponce(sfConnectionConfig);
-	String accessToken = new JSONObject(loingResponse).getString("access_token");
+    private String getAccessTokenFromSF() throws Exception {
+	String loginResponse = getHttpPostResponse(this.sfConnectionConfig);
+	String accessToken = new JSONObject(loginResponse).getString("access_token");
 	logger.debug("Access Token [" + accessToken + "]");
 	return accessToken;
     }
@@ -78,28 +84,19 @@ public class SFUtility {
      * @param accessToken
      *            To Access the org it required aceessToken for REST call
      * 
-     * @param baseURL
-     *            Login into SF org the URL is get provided for httpGet call.
-     * 
      * @return processInstanceIdList return List of string of processInstanceId
      * 
-     * @throws ClientProtocolException
-     * 
-     * @throws IOException
-     * 
-     * @throws JSONException
-     * 
-     * @throws CustomException
+     * @throws Exception
      * 
      */
-    public static List<String> getProcessInstanceIds(String developerQueueId, String accessToken, String baseURL) throws IOException, JSONException, CustomException {
+    public List<String> getProcessInstanceIds(String developerQueueId) throws Exception {
 	logger.debug("inside getProcessInstanceIds");
 	List<String> processInstanceIdList = new ArrayList<String>();
 	// we are thinking of using XML files to configure all the queries and
 	// read it from there - low priority.
 	String queryStr = "query?q=SELECT+ProcessInstanceId+FROM+ProcessInstanceWorkitem+where+ActorId=+'" + developerQueueId + "'";
 
-	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
+	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 
 	JSONObject processInstanceIdListJSON = new JSONObject(response);
 	JSONArray jsonObjArray = processInstanceIdListJSON.getJSONArray("records");
@@ -121,29 +118,19 @@ public class SFUtility {
      * @param accessToken
      *            To Access the org it required aceessToken for REST call
      * 
-     * @param baseURL
-     *            Login into SF org the URL is get provided for httpGet call.
-     * 
-     * @throws ClientProtocolException
-     * 
-     * @throws IOException
-     * 
-     * @throws JSONException
-     * 
-     * @throws CustomException
-     * 
+     * @throws Exception
      * 
      * @return targetobjectIdList return the List of String of targetObjectid list
      */
-    public static List<String> getTargetobjectInstanceIds(List<String> processInstanceIdList, String accessToken, String baseURL) throws IOException, JSONException, CustomException {
+    public List<String> getTargetobjectInstanceIds(List<String> processInstanceIdList) throws Exception {
 	if (processInstanceIdList.size() == 0) {
 	    return new ArrayList<String>();
 	}
 	List<String> targetobjectIdList = new ArrayList<String>();
-	String processInstanceStr = Utility.generateInCluaseString(processInstanceIdList);
+	String processInstanceStr = Utility.generateInClauseString(processInstanceIdList);
 	String queryStr = "query?q=SELECT+Id+,+targetObjectid+FROM+ProcessInstance+where+id+in+(" + processInstanceStr + ")";
 	logger.debug("query string===" + queryStr);
-	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
+	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 
 	JSONObject targetInstanceIdListJSON = new JSONObject((response));
 	logger.trace("josn object" + targetInstanceIdListJSON);
@@ -169,9 +156,6 @@ public class SFUtility {
      * @param accessToken
      *            To Access the org it required aceessToken for REST call
      * 
-     * @param baseURL
-     *            Login into SF org the URL is get provided for httpGet call.
-     * 
      * @param locale
      *            Language of the article that is going to be return
      * 
@@ -181,7 +165,7 @@ public class SFUtility {
      * @throws Exception
      */
 
-    public static List<SFArticle> getKnowLedgeArticlesTranslatedVersions(List<String> targetobjectInstanceIdList, String articleType, String accessToken, String baseURL, String locale, Boolean includeDraft) throws Exception {
+    public List<SFArticle> getKnowLedgeArticlesTranslatedVersions(List<String> targetobjectInstanceIdList, String articleType, String locale, Boolean includeDraft) throws Exception {
 	if (targetobjectInstanceIdList.size() == 0) {
 	    return new ArrayList<SFArticle>();
 	}
@@ -194,11 +178,11 @@ public class SFUtility {
 	}
 	List<SFArticle> sfArticleList = new ArrayList<SFArticle>();
 	for (String status : statusList) {
-	    String targetObjectIdStr = Utility.generateInCluaseString(targetobjectInstanceIdList);
+	    String targetObjectIdStr = Utility.generateInClauseString(targetobjectInstanceIdList);
 	    String queryStr = new String();
 	    queryStr = "query?q=SELECT+Id+,+KnowledgeArticleId+,+Title+,+Summary+,+OwnerId+,+MasterVersionId+,+Language+FROM+" + articleType + "+WHERE+language+=+'" + locale + "'+AND+MasterVersion.PublishStatus+=+'" + status + "'+AND+Id+IN+(" + targetObjectIdStr + ")";
 	    logger.debug("query " + queryStr);
-	    String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
+	    String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 
 	    JSONObject kaListJSON = new JSONObject((response));
 
@@ -210,25 +194,27 @@ public class SFUtility {
 		sfArticle.setLanguage(locale);
 		sfArticle.setMasterVersionId(jsonObj.getString("MasterVersionId"));
 		sfArticle.setType(articleType);
-			sfArticle.setDueDate(getDueDate(sfArticle.getId(), accessToken, baseURL));
+		sfArticle.setDueDate(getDueDate(sfArticle.getId()));
 		sfArticleList.add(sfArticle);
 	    }
 	}
 	return sfArticleList;
     }
 
-	private static Date getDueDate(String sourceArticleId, String accessToken, String baseURL)
-			throws IOException, CustomException, JSONException, ParseException {
-		String DueDateQueryStr = "knowledgeManagement/articleVersions/translations/" + sourceArticleId;
-		String DueDateResponce = Utility.getHttpGetResponce(baseURL, DueDateQueryStr, accessToken);
-		JSONObject KAListjson = new JSONObject((DueDateResponce));
-		String DueDate = KAListjson.getString("dueDate");
-		DateFormat format = new SimpleDateFormat("yyyy-MM-DD", Locale.ENGLISH);
-		Date date = format.parse(DueDate);
-		System.out.println("DUE DATE " + date);
-		return date;
-
+    private Date getDueDate(String sourceArticleId) throws Exception {
+	String DueDateQueryStr = "knowledgeManagement/articleVersions/translations/" + sourceArticleId;
+	String DueDateResponce = getHttpGetResponse(this.sfConnectionConfig.getUrl(), DueDateQueryStr);
+	JSONObject KAListjson = new JSONObject((DueDateResponce));
+	if (!KAListjson.isNull("dueDate")) {
+	    String DueDate = KAListjson.getString("dueDate");
+	    DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+	    Date date = format.parse(DueDate);
+	    return date;
 	}
+
+	return null;
+
+    }
 
     /**
      * 
@@ -241,18 +227,16 @@ public class SFUtility {
      * @param accessToken
      *            To Access the org it required aceessToken for REST call
      * 
-     * @param baseURL
-     *            Login into SF org the URL is get provided for httpGet call.
      * @return sfArticleList return list of SFArticle class variables.
      * @throws Exception
      */
-    public static InputStream getKnowLedgeArticlesRecords(SFArticle sourceArticle, List<SFArticleField> fields, String accessToken, String baseURL) throws Exception {
+    public InputStream getKnowLedgeArticlesRecords(SFArticle sourceArticle, List<SFArticleField> fields) throws Exception {
 	// todo - Add metadata fields hardcoded
 	List<SFArticleField> metadataFields = Utility.getSFArticleMetadataFieldList();
 
 	String queryStr = "query?q=select+" + Utility.getFieldsStr(fields) + "+,+" + Utility.getMetaDataFieldsStr(metadataFields) + "+from+" + sourceArticle.getType() + "+where+Id+in+('" + sourceArticle.getMasterVersionId() + "')";
 	logger.debug("last query==" + queryStr);
-	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
+	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 
 	JSONObject KAListjson = new JSONObject((response));
 
@@ -268,25 +252,21 @@ public class SFUtility {
      *            JSON data into StringEntity fromat
      * @param accessToken
      *            To Access the org it required aceessToken for REST call
-     * 
-     * @param baseURL
-     *            Login into SF org the URL is get provided for httpGet call.
      * @throws Exception
      */
-    public static void insertArticleIntoSF(SFArticle sourceArticle, InputStream stream, String accessToken, String baseURL) throws Exception {
+    public void insertArticleIntoSF(SFArticle sourceArticle, InputStream stream) throws Exception {
 	String queryStr = "sobjects/" + sourceArticle.getType() + "" + "/" + sourceArticle.getId();
 	JSONObject json = Utility.conevertStreamToJSON(stream);
 	String body = json.toString();
 	// body.setContentType("application/json");
-
-	Utility.getHttpPatchResponce(baseURL, queryStr, accessToken, body);
+	getHttpPatchResponse(this.sfConnectionConfig.getUrl(), queryStr, body);
 
     }
 
-    public static List<SFQueue> SFQueueList(String accessToken, String baseURL) throws CustomException, JSONException, Exception {
+    public List<SFQueue> SFQueueList() throws Exception {
 	List<SFQueue> queueList = new ArrayList<SFQueue>();
 	String queryStr = "query?q=SELECT+Id+,+name+FROM+Group+WHERE+Type+=+'Queue'";
-	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
+	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 
 	JSONObject queueIdListJSON = new JSONObject((response));
 	JSONArray jsonObjArray = queueIdListJSON.getJSONArray("records");
@@ -302,10 +282,10 @@ public class SFUtility {
 
     }
 
-    public static List<SFLocale> getlocales(String accessToken, String baseURL) throws IOException, JSONException, CustomException {
+    public List<SFLocale> getlocales() throws Exception {
 	List<SFLocale> Languages = new ArrayList<SFLocale>();
 	String queryStr = Constants.GET_LANG_QUERY;
-	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
+	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 	JSONObject json = new JSONObject(response);
 	JSONArray jsonArray = json.getJSONArray("fields").getJSONObject(3).getJSONArray("picklistValues");
 	if (jsonArray.length() == 0)
@@ -319,12 +299,10 @@ public class SFUtility {
 	return Languages;
     }
 
-    public static List<SFArticleType> gettype(String accessToken, String baseURL) throws IOException, JSONException, CustomException {
+    public List<SFArticleType> gettype() throws Exception {
 	List<SFArticleType> type = new ArrayList<SFArticleType>();
 	String queryStr = Constants.GET_OBJ_QUERY;
-
-	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
-
+	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 	JSONObject json = new JSONObject(response);
 	JSONArray josnArray = json.getJSONArray("sobjects");
 	if (josnArray.length() == 0) {
@@ -342,10 +320,10 @@ public class SFUtility {
 	return type;
     }
 
-    public static List<SFArticleField> FieldsForArticleType(String knowledgeArticleType, String accessToken, String baseURL) throws IOException, Exception {
+    public List<SFArticleField> FieldsForArticleType(String knowledgeArticleType) throws IOException, Exception {
 	List<SFArticleField> articleFields = new ArrayList<SFArticleField>();
 	String queryStr = "sobjects/" + knowledgeArticleType + "/describe";
-	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
+	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 	JSONObject json = new JSONObject(response);
 	JSONArray jsonArray = json.getJSONArray("fields");
 	if (jsonArray.length() == 0)
@@ -369,18 +347,16 @@ public class SFUtility {
 
     }
 
-    public static void insertAssignedId(SFArticle sourceArticle, String userId, String accessToken, String baseURL) throws IOException, Exception {
+    public void insertAssignedId(SFArticle sourceArticle, String userId) throws IOException, Exception {
 	String queryStr = "knowledgeManagement/articleVersions/translations/" + sourceArticle.getId();
-
 	String body = "{\"assigneeId\":\"" + userId + "\"}";
-
-	Utility.getHttpPatchResponce(baseURL, queryStr, accessToken, body);
+	getHttpPatchResponse(this.sfConnectionConfig.getUrl(), queryStr, body);
     }
 
-    public static List<SFUser> getUserInfo(String accessToken, String baseURL) throws IOException, CustomException, JSONException {
+    public List<SFUser> getUserInfo() throws Exception {
 	List<SFUser> userList = new ArrayList<SFUser>();
 	String queryStr = "query?q=SELECT+Id+,+Name+FROM+User+WHERE+UserPermissionsKnowledgeUser+=+true";
-	String response = Utility.getHttpGetResponce(baseURL, queryStr, accessToken);
+	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 
 	JSONObject kaListJSON = new JSONObject((response));
 	JSONArray jsonArray = kaListJSON.getJSONArray("records");
@@ -396,5 +372,193 @@ public class SFUtility {
 	}
 	return userList;
 
+    }
+
+    /**
+     * 
+     * @param baseURL
+     *            crate Httpget method
+     * @param queryStr
+     *            query that pass in url
+     * @param accessToken
+     *            to add header using sdUtility
+     * @return
+     * @throws ClientProtocolException
+     * @throws IOException
+     * @throws CustomException
+     */
+    private String getHttpGetResponse(String baseURL, String queryStr) throws Exception {
+	URL url;
+	HttpsURLConnection connection = null;
+	StringBuffer response = new StringBuffer();
+	try {
+	    url = new URL(baseURL + "/" + Constants.REST_URL + queryStr);
+	    logger.info("HTTP GET URL - " + url);
+	    connection = (HttpsURLConnection) url.openConnection();
+	    connection.setRequestProperty("Authorization", "OAuth " + this.getAccessTokenFromSF());
+	    connection.setRequestProperty("accept", Constants.ACCEPT_STRING);
+	    connection.setRequestMethod("GET");
+
+	    connection.setRequestProperty("Content-Type", Constants.CONTENT_TYPE_VAL);
+	    connection.setRequestProperty("Content-Language", "en-US");
+	    connection.setUseCaches(false);
+	    connection.setDoInput(true);
+	    connection.setDoOutput(true);
+
+	    if (connection.getResponseCode() == Constants.SUCCESS_CODE) {
+		logger.info("RESPONSE CODE - " + connection.getResponseCode());
+
+		InputStream is = connection.getInputStream();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		String line;
+
+		while ((line = rd.readLine()) != null) {
+		    response.append(line);
+		    response.append('\r');
+		}
+		rd.close();
+
+		// return response.toString();
+	    } else {
+		throw new CustomException("Error in callout. Error code:" + connection.getResponseCode() + " Error message:" + connection.getResponseMessage());
+	    }
+	} catch (IOException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw ex;
+
+	}
+	return response.toString();
+    }
+
+    private String getHttpPostResponse(SFConnectionConfig loginDetailBean) throws Exception {
+	URL url;
+	HttpsURLConnection connection = null;
+	StringBuffer response = new StringBuffer();
+	String urlParameters = "grant_type=password&client_id=" + loginDetailBean.getConsumerKey() + "&client_secret=" + loginDetailBean.getConsumerSecret() + "&username=" + loginDetailBean.getUser() + "&password=" + loginDetailBean.getPassword();
+	try {
+	    url = new URL(loginDetailBean.getUrl() + Constants.AUTH_URL);
+	    logger.info("HTTP POST URL - " + url);
+	    logger.trace(urlParameters);
+	    connection = (HttpsURLConnection) url.openConnection();
+	    connection.setRequestProperty("accept", "application/json");
+	    connection.setRequestMethod("POST");
+	    connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+	    connection.setRequestProperty("Content-Type", Constants.CONTENT_TYPE_VAL);
+	    connection.setRequestProperty("Content-Language", "en-US");
+	    connection.setUseCaches(false);
+	    connection.setDoInput(true);
+	    connection.setDoOutput(true);
+	    OutputStream os = connection.getOutputStream();
+	    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+	    writer.write(urlParameters);
+	    writer.flush();
+	    writer.close();
+	    os.close();
+
+	    InputStream is = connection.getInputStream();
+	    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+	    String line;
+	    while ((line = rd.readLine()) != null) {
+		response.append(line);
+		response.append('\r');
+	    }
+	    rd.close();
+	} catch (IOException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw new Exception("Please enter valid SalesForce Configuartion Values.");
+	}
+
+	return response.toString();
+
+    }
+
+    private void getHttpPatchResponse(String baseURL, String queryStr, String body) throws Exception {
+
+	URL url;
+	HttpsURLConnection connection = null;
+	try {
+	    url = new URL(baseURL + Constants.REST_URL + queryStr);
+	    logger.info("HTTP PATCH URL - " + url);
+	    logger.trace(body);
+	    connection = (HttpsURLConnection) url.openConnection();
+	    connection.setRequestProperty("Authorization", "OAuth " + this.getAccessTokenFromSF());
+	    setRequestMethodUsingWorkaround(connection, "PATCH");
+	    connection.setRequestProperty("Content-Type", "application/json");
+	    connection.setUseCaches(false);
+	    connection.setDoInput(true);
+	    connection.setDoOutput(true);
+	    OutputStream os = connection.getOutputStream();
+	    os.write(body.getBytes("UTF-8"));
+	    os.flush();
+	    os.close();
+
+	    InputStream is = connection.getInputStream();
+	    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+	    String line;
+	    StringBuffer response = new StringBuffer();
+	    while ((line = rd.readLine()) != null) {
+		response.append(line);
+		response.append('\r');
+	    }
+	    rd.close();
+	    // return response.toString();
+	    if (connection.getResponseCode() != 204) {
+		logger.error("responce code  " + connection.getResponseCode() + "  " + connection.getResponseMessage() + " Message :" + response.toString());
+		throw new CustomException("HTTP PATCH Responce Error" + connection.getResponseCode());
+
+	    } else {
+		logger.debug("record Inserted successfully!!!!");
+		logger.debug("responce code  " + connection.getResponseCode() + "  " + connection.getResponseMessage() + " Message :" + response.toString());
+	    }
+	} catch (IOException ex) {
+	    logger.error(ex.getMessage(), ex);
+	    throw ex;
+	}
+
+    }
+
+    private final void setRequestMethodUsingWorkaround(final HttpURLConnection httpURLConnection, final String method) {
+	try {
+	    httpURLConnection.setRequestMethod(method);
+	    // Check whether we are running on a buggy JRE
+	} catch (final ProtocolException pe) {
+	    Class<?> connectionClass = httpURLConnection.getClass();
+	    java.lang.reflect.Field delegateField = null;
+	    try {
+		delegateField = connectionClass.getDeclaredField("delegate");
+		delegateField.setAccessible(true);
+		HttpURLConnection delegateConnection = (HttpURLConnection) delegateField.get(httpURLConnection);
+		setRequestMethodUsingWorkaround(delegateConnection, method);
+	    } catch (NoSuchFieldException e) {
+		// Ignore for now, keep going
+	    } catch (IllegalArgumentException e) {
+		throw new RuntimeException(e);
+	    } catch (IllegalAccessException e) {
+		throw new RuntimeException(e);
+	    }
+	    try {
+		java.lang.reflect.Field methodField;
+		while (connectionClass != null) {
+		    try {
+			methodField = connectionClass.getDeclaredField("method");
+		    } catch (NoSuchFieldException e) {
+			connectionClass = connectionClass.getSuperclass();
+			continue;
+		    }
+		    methodField.setAccessible(true);
+		    methodField.set(httpURLConnection, method);
+		    break;
+		}
+	    } catch (final Exception e) {
+		throw new RuntimeException(e);
+	    }
+	}
+    }
+
+    public boolean testConnection() throws Exception {
+	if (StringUtils.isNotBlank(this.getAccessTokenFromSF())) {
+	    return true;
+	}
+	return false;
     }
 }
