@@ -31,9 +31,8 @@ public class SFKnowledgeArticleServiceImpl implements SFKnowledgeArticleService 
      */
     public List<SFArticle> getReadyArticleIdsForTranslation(String targetSFLocale, String articleType, String sfQueueId, Boolean includeDraft) throws Exception {
 	SalesForceService sfService = new SalesForceService(this.connectionConfig);
-	List<String> processInstanceIdList = sfService.getProcessInstanceIds(sfQueueId);
-	List<String> targetInstaceIdList = sfService.getTargetobjectInstanceIds(processInstanceIdList);
-	List<SFArticle> sfArticleList = sfService.getKnowLedgeArticlesTranslatedVersions(targetInstaceIdList, articleType, targetSFLocale, includeDraft);
+	List<String> targetInstanceIdList = sfService.getTargetInstanceIds(sfQueueId);
+	List<SFArticle> sfArticleList = sfService.getKnowLedgeArticlesTranslatedVersions(targetInstanceIdList, articleType, targetSFLocale, includeDraft);
 	return sfArticleList;
     }
 

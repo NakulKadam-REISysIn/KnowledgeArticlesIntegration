@@ -49,7 +49,7 @@ import com.translations.globallink.connect.sf.model.vendor.exception.CustomExcep
 public class SalesForceService {
 
     private static Logger logger = Logger.getLogger(SalesForceService.class);
-
+    private static String accessToken = null;
     private SFConnectionConfig sfConnectionConfig;
 
     public SalesForceService(SFConnectionConfig sfConnectionConfig) {
@@ -69,8 +69,10 @@ public class SalesForceService {
      * @throws Exception
      */
     private String getAccessTokenFromSF() throws Exception {
-	String loginResponse = getHttpPostResponse(this.sfConnectionConfig);
-	String accessToken = new JSONObject(loginResponse).getString("access_token");
+	if(accessToken == null) {
+		String loginResponse = getHttpPostResponse(this.sfConnectionConfig);
+		accessToken = new JSONObject(loginResponse).getString("access_token");
+	}
 	logger.debug("Access Token [" + accessToken + "]");
 	return accessToken;
     }
@@ -84,17 +86,17 @@ public class SalesForceService {
      * @param accessToken
      *            To Access the org it required aceessToken for REST call
      * 
-     * @return processInstanceIdList return List of string of processInstanceId
+     * @return targetobjectIdList return the List of String of targetObjectid list
      * 
      * @throws Exception
      * 
      */
-    public List<String> getProcessInstanceIds(String developerQueueId) throws Exception {
+    public List<String> getTargetInstanceIds(String developerQueueId) throws Exception {
 	logger.debug("inside getProcessInstanceIds");
 	List<String> processInstanceIdList = new ArrayList<String>();
 	// we are thinking of using XML files to configure all the queries and
 	// read it from there - low priority.
-	String queryStr = "query?q=SELECT+ProcessInstanceId+FROM+ProcessInstanceWorkitem+where+ActorId=+'" + developerQueueId + "'";
+	String queryStr = "query?q=SELECT+ProcessInstance.targetObjectid+FROM+ProcessInstanceWorkitem+where+ActorId=+'" + developerQueueId + "'";
 
 	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
 
@@ -105,44 +107,11 @@ public class SalesForceService {
 	    return new ArrayList<String>();
 	}
 	for (int i = 0; i < jsonObjArray.length(); i++) {
-	    processInstanceIdList.add(jsonObjArray.getJSONObject(i).getString("ProcessInstanceId"));
+		processInstanceIdList.add(jsonObjArray.getJSONObject(i).
+				getJSONObject("ProcessInstance").getString("TargetObjectId"));
 	}
 
 	return processInstanceIdList;
-    }
-
-    /**
-     * @param processInstanceIdList
-     *            List of ProcessInstanceId to query on ProcessInstance object to get targetObjectId
-     * 
-     * @param accessToken
-     *            To Access the org it required aceessToken for REST call
-     * 
-     * @throws Exception
-     * 
-     * @return targetobjectIdList return the List of String of targetObjectid list
-     */
-    public List<String> getTargetobjectInstanceIds(List<String> processInstanceIdList) throws Exception {
-	if (processInstanceIdList.size() == 0) {
-	    return new ArrayList<String>();
-	}
-	List<String> targetobjectIdList = new ArrayList<String>();
-	String processInstanceStr = Utility.generateInClauseString(processInstanceIdList);
-	String queryStr = "query?q=SELECT+Id+,+targetObjectid+FROM+ProcessInstance+where+id+in+(" + processInstanceStr + ")";
-	logger.debug("query string===" + queryStr);
-	String response = getHttpGetResponse(this.sfConnectionConfig.getUrl(), queryStr);
-
-	JSONObject targetInstanceIdListJSON = new JSONObject((response));
-	logger.trace("josn object" + targetInstanceIdListJSON);
-	JSONArray jsonArray = targetInstanceIdListJSON.getJSONArray("records");
-	if (jsonArray.length() == 0) {
-	    return new ArrayList<String>();
-	}
-	for (int i = 0; i < jsonArray.length(); i++) {
-	    targetobjectIdList.add(jsonArray.getJSONObject(i).getString("TargetObjectId"));
-	}
-	logger.debug("targetobject" + targetobjectIdList);
-	return targetobjectIdList;
     }
 
     /**
@@ -194,7 +163,7 @@ public class SalesForceService {
 		sfArticle.setLanguage(locale);
 		sfArticle.setMasterVersionId(jsonObj.getString("MasterVersionId"));
 		sfArticle.setType(articleType);
-		sfArticle.setDueDate(getDueDate(sfArticle.getId()));
+		//sfArticle.setDueDate(getDueDate(sfArticle.getId()));
 		sfArticleList.add(sfArticle);
 	    }
 	}
@@ -419,8 +388,13 @@ public class SalesForceService {
 		rd.close();
 
 		// return response.toString();
-	    } else {
-		throw new CustomException("Error in callout. Error code:" + connection.getResponseCode() + " Error message:" + connection.getResponseMessage());
+	    }else if(connection.getResponseCode() == 401 && connection.getResponseMessage().contains("Unauthorized")){
+			System.out.println("Error Code=======401");
+			SalesForceService.accessToken = null;
+			getAccessTokenFromSF();
+			return getHttpGetResponse(baseURL, queryStr);
+		} else {
+	    	throw new CustomException("Error in callout. Error code:" + connection.getResponseCode() + " Error message:" + connection.getResponseMessage());
 	    }
 	} catch (IOException ex) {
 	    logger.error(ex.getMessage(), ex);

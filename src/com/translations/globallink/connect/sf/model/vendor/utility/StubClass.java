@@ -31,7 +31,7 @@ public class StubClass {
      */
 
     public static void main(String[] args) throws Exception {
-	//	callgetReadyArticleIdsForTranslation();//after translation
+		callgetReadyArticleIdsForTranslation();//after translation
 	//	callgetArticleStreamForTranslation();// before transaltion
 	//	callimportTranslatedArticle();
 	//	callgetSFQueues();
@@ -47,11 +47,11 @@ public class StubClass {
     public static SFConnectionConfig getLoginDetailsFromMiddleware() {
 	SFConnectionConfig loginDetailBean = new SFConnectionConfig();
 	loginDetailBean.setUser("Nakul@ka.dev");
-	loginDetailBean.setPassword("test@123ELikr4MyfI1xfgtYZdCyxeTnv");
-	loginDetailBean.setConsumerKey("3MVG9ZL0ppGP5UrBR.600kPJSKldTpds6SxCgEgj44lSgMJAcU9C5etNsi9y5GusxXFEuSKd3m3oylBiXdNtR");
+	loginDetailBean.setPassword("test@1234ELikr4MyfI1xfgtYZdCyxeTnv");
+	loginDetailBean
+			.setConsumerKey("3MVG9ZL0ppGP5UrBR.600kPJSKldTpds6SxCgEgj44lSgMJAcU9C5etNsi9y5GusxXFEuSKd3m3oylBiXdNtR");
 	loginDetailBean.setConsumerSecret("5127982414795005574");
 	loginDetailBean.setUrl("https://ap2.salesforce.com");
-	//loginDetailBean.setQueueId("00G28000000U3LoEAK");
 	return loginDetailBean;
     }
 
